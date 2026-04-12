@@ -38,6 +38,7 @@ export default function HomePage() {
         filter: selectedCat ? 'blur(6px)' : 'none',
         transition: 'filter 0.3s ease',
         pointerEvents: selectedCat ? 'none' : 'auto',
+        background: '#fff',
       }}>
         {/* ── Logo header ── */}
         <div style={{
