@@ -6,6 +6,7 @@ export default function ReviewsPage() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [filterProd, setFilterProd] = useState('')
+  const [filterStar, setFilterStar] = useState('')
   const [confirm,    setConfirm]    = useState(null)
   const [viewReview, setViewReview] = useState(null)
   const [notif,      setNotif]      = useState('')
@@ -34,9 +35,9 @@ export default function ReviewsPage() {
     load()
   }
 
-  const filtered = filterProd
-    ? reviews.filter(r => String(r.product_id) === filterProd)
-    : reviews
+  const filtered = reviews
+    .filter(r => filterProd ? String(r.product_id) === filterProd : true)
+    .filter(r => filterStar ? r.rating === parseInt(filterStar) : true)
 
   const prodName = id => products.find(p => p.id === id)?.name || `Product #${id}`
 
@@ -52,6 +53,14 @@ export default function ReviewsPage() {
             {products.map(p => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
+          </select>
+          <select className="filter-select" value={filterStar} onChange={e => setFilterStar(e.target.value)}>
+            <option value="">All Ratings</option>
+            <option value="5">★★★★★ 5 Star</option>
+            <option value="4">★★★★☆ 4 Star</option>
+            <option value="3">★★★☆☆ 3 Star</option>
+            <option value="2">★★☆☆☆ 2 Star</option>
+            <option value="1">★☆☆☆☆ 1 Star</option>
           </select>
           <span style={{ color: 'var(--muted)', fontSize: '0.84rem' }}>{filtered.length} review{filtered.length !== 1 ? 's' : ''}</span>
         </div>
