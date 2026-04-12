@@ -43,7 +43,7 @@ function HoverCard({ children }) {
       onMouseEnter={() => setHover(true)}
       onMouseLeave={onMouseLeave}
       style={{
-        width: 420,
+        width: '100%', maxWidth: 420,
         borderRadius: 24,
         background: '#fff',
         padding: '44px 40px',
@@ -158,10 +158,11 @@ export default function AdminLogin() {
 
   return (
     <div style={{
-      display: 'flex', height: '100vh', overflow: 'hidden',
+      display: 'flex', minHeight: '100vh',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       background: 'linear-gradient(135deg,#3B0764 0%,#6D28D9 40%,#7C3AED 70%,#8B5CF6 100%)',
       position: 'relative',
+      flexDirection: 'row',
     }}>
 
       {/* ── Full-screen animated bubbles ── */}
@@ -185,20 +186,20 @@ export default function AdminLogin() {
         ))}
       </div>
 
-      {/* ── LEFT — brand content ── */}
-      <div style={{
+      {/* ── LEFT — brand content (hidden on mobile) ── */}
+      <div className="admin-login-left" style={{
         flex: 1, display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
         padding: 48, position: 'relative', zIndex: 1,
       }}>
         <img src={adminLogoImg} alt="FOFiTOS Admin" style={{ maxWidth: 420, width: '75%', objectFit: 'contain' }}/>
-
       </div>
 
       {/* ── RIGHT — hoverboard card ── */}
       <div style={{
         flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        position: 'relative', zIndex: 1,
+        position: 'relative', zIndex: 1, padding: '24px 16px',
+        minHeight: '100vh',
       }}>
         <HoverCard>
 
@@ -346,6 +347,9 @@ export default function AdminLogin() {
           33%  { transform: translateY(-28px) scale(1.04); opacity: 1;   }
           66%  { transform: translateY(-12px) scale(0.97); opacity: 0.8; }
           100% { transform: translateY(0px)   scale(1);    opacity: 0.7; }
+        }
+        @media (max-width: 640px) {
+          .admin-login-left { display: none !important; }
         }
       `}</style>
     </div>
