@@ -200,8 +200,8 @@ export default function AdminLogin() {
 
       {/* ── RIGHT — hoverboard card ── */}
       <div style={{
-        flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
-        position: 'relative', zIndex: 1, padding: '0 16px 24px',
+        flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        position: 'relative', zIndex: 1, padding: '24px 16px',
         minHeight: '100vh', gap: 0,
       }}>
         {/* Logo above card — mobile only */}
