@@ -264,6 +264,29 @@ export default function DetailPage() {
         }
       `}</style>
 
+      {/* ── Back button ── */}
+      <button
+        onClick={() => {
+          if (leavingRef.current) return
+          leavingRef.current = true
+          setLeaving(true)
+          setTimeout(() => nav('/', { state: { restoreCat: savedCat, carouselProducts: savedProducts, restoreProductId: product?.id } }), 520)
+        }}
+        style={{
+          position: 'fixed', top: 16, left: 16, zIndex: 999,
+          width: 40, height: 40, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.92)',
+          border: 'none', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
+          backdropFilter: 'blur(8px)',
+        }}
+      >
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+          <path d="M19 12H5M5 12l7 7M5 12l7-7" stroke="#4C1D95" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+
       <div
         ref={scrollRef}
         className="dp-scroll"
