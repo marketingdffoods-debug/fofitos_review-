@@ -204,8 +204,14 @@ export default function AdminLogin() {
         <HoverCard>
 
           {/* Logo — visible only on mobile */}
-          <div className="admin-mobile-logo" style={{ textAlign:'center', marginBottom: 20 }}>
-            <img src={adminLogoImg} alt="FOFiTOS Admin" style={{ height: 80, objectFit:'contain' }}/>
+          <div className="admin-mobile-logo" style={{
+            marginBottom: 24, marginLeft: -40, marginRight: -40, marginTop: -44,
+            background: 'linear-gradient(135deg,#4C1D95,#7B2CBF)',
+            borderRadius: '20px 20px 0 0',
+            padding: '28px 24px',
+            textAlign: 'center',
+          }}>
+            <img src={adminLogoImg} alt="FOFiTOS Admin" style={{ height: 90, objectFit:'contain' }}/>
           </div>
 
           {/* ══ SIGN IN ══ */}
