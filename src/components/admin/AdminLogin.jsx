@@ -203,6 +203,11 @@ export default function AdminLogin() {
       }}>
         <HoverCard>
 
+          {/* Logo — visible only on mobile */}
+          <div className="admin-mobile-logo" style={{ textAlign:'center', marginBottom: 20 }}>
+            <img src={adminLogoImg} alt="FOFiTOS Admin" style={{ height: 80, objectFit:'contain' }}/>
+          </div>
+
           {/* ══ SIGN IN ══ */}
           {step === 'login' && (
             <form onSubmit={handleLogin} style={{ width: '100%' }}>
@@ -348,8 +353,10 @@ export default function AdminLogin() {
           66%  { transform: translateY(-12px) scale(0.97); opacity: 0.8; }
           100% { transform: translateY(0px)   scale(1);    opacity: 0.7; }
         }
+        .admin-mobile-logo { display: none; }
         @media (max-width: 640px) {
           .admin-login-left { display: none !important; }
+          .admin-mobile-logo { display: block; }
         }
       `}</style>
     </div>
