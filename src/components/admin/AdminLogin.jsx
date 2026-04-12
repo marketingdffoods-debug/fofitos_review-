@@ -197,22 +197,16 @@ export default function AdminLogin() {
 
       {/* ── RIGHT — hoverboard card ── */}
       <div style={{
-        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         position: 'relative', zIndex: 1, padding: '24px 16px',
-        minHeight: '100vh',
+        minHeight: '100vh', gap: 24,
       }}>
-        <HoverCard>
+        {/* Logo above card — mobile only */}
+        <div className="admin-mobile-logo">
+          <img src={adminLogoImg} alt="FOFiTOS Admin" style={{ height: 100, objectFit: 'contain' }}/>
+        </div>
 
-          {/* Logo — visible only on mobile */}
-          <div className="admin-mobile-logo" style={{
-            marginBottom: 24, marginLeft: -40, marginRight: -40, marginTop: -44,
-            background: 'linear-gradient(135deg,#4C1D95,#7B2CBF)',
-            borderRadius: '20px 20px 0 0',
-            padding: '28px 24px',
-            textAlign: 'center',
-          }}>
-            <img src={adminLogoImg} alt="FOFiTOS Admin" style={{ height: 90, objectFit:'contain' }}/>
-          </div>
+        <HoverCard>
 
           {/* ══ SIGN IN ══ */}
           {step === 'login' && (
