@@ -23,11 +23,13 @@ export default function HomePage() {
   useEffect(() => {
     Promise.all([
       sb.from('categories').select('*').order('sort_order'),
-      sb.from('products').select('id, name, cat')
+      sb.from('products').select('id, name, cat, img')
     ]).then(([{ data: catData }, { data: prodData }]) => {
       setCats(catData || [])
       setProducts(prodData || [])
       setLoading(false)
+      // Preload all product images in the background so carousel swipes are instant
+      ;(prodData || []).forEach(p => { if (p.img) { const i = new Image(); i.src = p.img } })
     })
   }, [])
 

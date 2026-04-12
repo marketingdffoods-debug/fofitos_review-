@@ -64,9 +64,12 @@ export default function InlineCarousel({ cat, skipAnimation = false, initialProd
       .eq('cat', cat.id)
       .order('sort_order', { ascending: true })
       .then(({ data }) => {
-        setProducts(data || [])
-        setActiveIdx(findIdx(data || []))
+        const prods = data || []
+        setProducts(prods)
+        setActiveIdx(findIdx(prods))
         setLoading(false)
+        // Preload all product images so swiping is instant
+        prods.forEach(p => { if (p.img) { const i = new Image(); i.src = p.img } })
       })
     return () => { clearTimeout(snapTimer.current); clearTimeout(navTimer.current) }
   }, [cat.id])
@@ -140,9 +143,13 @@ export default function InlineCarousel({ cat, skipAnimation = false, initialProd
     if (exiting || !products[activeIdx]) return
     setExiting(true)
     const p = products[activeIdx]
+    // Preload the product image immediately so DetailPage renders it from cache
+    if (p.img) { const preload = new Image(); preload.src = p.img }
     const tStart = Date.now()
     sb.from('products').select('*').eq('id', p.id).single()
       .then(({ data: full }) => {
+        // Also preload full-res image if different
+        if (full?.img && full.img !== p.img) { const preload = new Image(); preload.src = full.img }
         const wait = Math.max(0, 700 - (Date.now() - tStart))
         navTimer.current = setTimeout(() =>
           nav(`/product/${p.id}`, { state: { fromCarousel: true, product: full || p, cat, products } }), wait)
@@ -177,6 +184,7 @@ export default function InlineCarousel({ cat, skipAnimation = false, initialProd
       opacity: isActive ? 1 : Math.max(0.6, 1 - 0.4 * d),
       zIndex: isActive ? 5 : 3,
       transition: snapping ? snap : 'none',
+      willChange: 'transform',
     }
   }
 
@@ -202,6 +210,7 @@ export default function InlineCarousel({ cat, skipAnimation = false, initialProd
           opacity: exiting ? 0 : 1,
           transition: exiting ? 'opacity 0.08s' : 'none',
           animation: exiting || skipAnimation ? 'none' : 'sheetUp 0.42s cubic-bezier(0.22,1,0.36,1) both',
+          willChange: 'transform',
         }}
         onTouchStart={e => dragStart(e.touches[0].clientX, e.touches[0].clientY)}
         onTouchEnd={dragEnd}
@@ -319,6 +328,7 @@ export default function InlineCarousel({ cat, skipAnimation = false, initialProd
             position:'fixed', top:80, left:'50%',
             zIndex:211, pointerEvents:'none',
             animation:'burgerRise 0.52s cubic-bezier(0.22,1,0.36,1) forwards',
+            willChange: 'transform',
           }}>
             <img src={active.img} alt={active.name} style={{
               width:185, height:185, objectFit:'contain', display:'block',
@@ -333,6 +343,7 @@ export default function InlineCarousel({ cat, skipAnimation = false, initialProd
             animation:'cardRise 0.52s cubic-bezier(0.22,1,0.36,1) forwards',
             background:'linear-gradient(145deg,#7B2CBF 0%,#4C1D95 100%)',
             borderRadius:22, padding:'90px 20px 24px', overflow:'hidden',
+            willChange: 'transform',
           }}>
             <div style={{position:'absolute',top:-30,right:-20,width:130,height:130,borderRadius:'50%',background:'rgba(167,139,250,0.25)',filter:'blur(35px)',pointerEvents:'none'}}/>
             <div style={{position:'absolute',bottom:-20,left:-10,width:100,height:100,borderRadius:'50%',background:'rgba(91,33,182,0.35)',filter:'blur(25px)',pointerEvents:'none'}}/>

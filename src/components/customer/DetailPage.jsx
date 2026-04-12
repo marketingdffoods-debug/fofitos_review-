@@ -147,6 +147,7 @@ export default function DetailPage() {
   const [leaving,        setLeaving]        = useState(false)
   const [macrosRevealed, setMacrosRevealed] = useState(false)
   const [chartIn,        setChartIn]        = useState(false)
+  const [imgLoaded,      setImgLoaded]      = useState(!!fromCarousel) // skip fade when from carousel (already preloaded)
 
   /* ── swipe-down-to-go-back ── */
   const scrollRef   = useRef(null)
@@ -305,10 +306,14 @@ export default function DetailPage() {
             animation: heroAnim ?? 'imgFloat 0.55s cubic-bezier(0.22,1,0.36,1) both',
           }}>
             <img src={p.img} alt={p.name}
+              onLoad={() => setImgLoaded(true)}
               style={{
                 width: 185, height: 185, objectFit: 'contain',
                 filter: 'drop-shadow(0 16px 36px rgba(0,0,0,0.35))',
                 display: 'block',
+                willChange: 'transform',
+                opacity: imgLoaded ? 1 : 0,
+                transition: imgLoaded ? 'opacity 0.28s ease' : 'none',
               }}
             />
           </div>
@@ -318,6 +323,7 @@ export default function DetailPage() {
             borderRadius: 22, padding:'90px 20px 24px',
             position:'relative', overflow:'hidden',
             animation: heroAnim ?? 'cardUp 0.45s 0.05s cubic-bezier(0.22,1,0.36,1) both',
+            willChange: 'transform',
           }}>
             <div style={{position:'absolute',top:-30,right:-20,width:130,height:130,borderRadius:'50%',background:'rgba(167,139,250,0.25)',filter:'blur(35px)',pointerEvents:'none'}}/>
             <div style={{position:'absolute',bottom:-20,left:-10,width:100,height:100,borderRadius:'50%',background:'rgba(91,33,182,0.35)',filter:'blur(25px)',pointerEvents:'none'}}/>
@@ -531,6 +537,7 @@ export default function DetailPage() {
             position:'fixed', top:80, left:'50%',
             zIndex:215, pointerEvents:'none',
             animation:'burgerDown 0.45s 0.06s cubic-bezier(0.4,0,1,1) both',
+            willChange: 'transform',
           }}>
             <img src={p.img} alt={p.name} style={{
               width:185, height:185, objectFit:'contain', display:'block',
@@ -545,6 +552,7 @@ export default function DetailPage() {
             animation:'cardDown 0.45s 0.06s cubic-bezier(0.4,0,1,1) both',
             background:'linear-gradient(145deg,#7B2CBF 0%,#4C1D95 100%)',
             borderRadius:22, padding:'90px 20px 24px', overflow:'hidden',
+            willChange: 'transform',
           }}>
             <div style={{position:'absolute',top:-30,right:-20,width:130,height:130,borderRadius:'50%',background:'rgba(167,139,250,0.25)',filter:'blur(35px)',pointerEvents:'none'}}/>
             <div style={{position:'absolute',bottom:-20,left:-10,width:100,height:100,borderRadius:'50%',background:'rgba(91,33,182,0.35)',filter:'blur(25px)',pointerEvents:'none'}}/>
