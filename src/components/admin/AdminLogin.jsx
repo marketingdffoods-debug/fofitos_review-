@@ -202,8 +202,8 @@ export default function AdminLogin() {
         minHeight: '100vh', gap: 24,
       }}>
         {/* Logo above card — mobile only */}
-        <div className="admin-mobile-logo">
-          <img src={adminLogoImg} alt="FOFiTOS Admin" style={{ height: 100, objectFit: 'contain' }}/>
+        <div className="admin-mobile-logo" style={{ width: '100%', textAlign: 'center', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img src={adminLogoImg} alt="FOFiTOS Admin" style={{ width: '90%', maxHeight: '100%', objectFit: 'contain' }}/>
         </div>
 
         <HoverCard>
@@ -356,7 +356,7 @@ export default function AdminLogin() {
         .admin-mobile-logo { display: none; }
         @media (max-width: 640px) {
           .admin-login-left { display: none !important; }
-          .admin-mobile-logo { display: block; }
+          .admin-mobile-logo { display: flex !important; }
         }
       `}</style>
     </div>
