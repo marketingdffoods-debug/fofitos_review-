@@ -284,6 +284,7 @@ export default function AdminLayout() {
               to={item.to}
               end={item.end}
               className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+              onClick={() => { if (window.innerWidth <= 768) setOpen(false) }}
             >
               <span className="nav-icon">{item.icon}</span>
               <span className="nav-label">{item.label}</span>
