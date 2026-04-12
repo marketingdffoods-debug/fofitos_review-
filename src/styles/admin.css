@@ -276,17 +276,24 @@ body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--te
    STAT CARDS
 ══════════════════════════════ */
 .stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
+  flex-direction: row;
   gap: 16px;
   margin-bottom: 24px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 4px;
 }
+.stats-grid::-webkit-scrollbar { display: none; }
 .stat-card {
   background: var(--white);
   border-radius: var(--r);
   padding: 22px 20px;
   box-shadow: 0 2px 16px rgba(91,33,182,0.06);
   border: 1px solid var(--border);
+  flex: 0 0 160px;
+  min-width: 160px;
 }
 .stat-label {
   font-size: 0.7rem;
