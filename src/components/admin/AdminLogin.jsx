@@ -14,14 +14,14 @@ function HoverCard({ children }) {
   const [glow,  setGlow]  = useState({ x: 50, y: 50 })
   const [hover, setHover] = useState(false)
 
-  function onMouseMove(e) {
+  function applyTilt(clientX, clientY) {
     const card = cardRef.current
     if (!card) return
     const { left, top, width, height } = card.getBoundingClientRect()
-    const x = e.clientX - left
-    const y = e.clientY - top
-    const rx =  ((y / height) - 0.5) * 18   // tilt X axis
-    const ry = -((x / width)  - 0.5) * 18   // tilt Y axis
+    const x = clientX - left
+    const y = clientY - top
+    const rx =  ((y / height) - 0.5) * 18
+    const ry = -((x / width)  - 0.5) * 18
     cancelAnimationFrame(frameRef.current)
     frameRef.current = requestAnimationFrame(() => {
       setTilt({ rx, ry })
@@ -29,7 +29,7 @@ function HoverCard({ children }) {
     })
   }
 
-  function onMouseLeave() {
+  function resetTilt() {
     cancelAnimationFrame(frameRef.current)
     setTilt({ rx: 0, ry: 0 })
     setGlow({ x: 50, y: 50 })
@@ -39,9 +39,12 @@ function HoverCard({ children }) {
   return (
     <div
       ref={cardRef}
-      onMouseMove={onMouseMove}
+      onMouseMove={e => applyTilt(e.clientX, e.clientY)}
       onMouseEnter={() => setHover(true)}
-      onMouseLeave={onMouseLeave}
+      onMouseLeave={resetTilt}
+      onTouchStart={e => { setHover(true); applyTilt(e.touches[0].clientX, e.touches[0].clientY) }}
+      onTouchMove={e => applyTilt(e.touches[0].clientX, e.touches[0].clientY)}
+      onTouchEnd={resetTilt}
       style={{
         width: '100%', maxWidth: 420,
         borderRadius: 24,
@@ -202,8 +205,8 @@ export default function AdminLogin() {
         minHeight: '100vh', gap: 0,
       }}>
         {/* Logo above card — mobile only */}
-        <div className="admin-mobile-logo" style={{ width: '100%', textAlign: 'center', flex: 1, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: 0 }}>
-          <img src={adminLogoImg} alt="FOFiTOS Admin" style={{ width: '90%', objectFit: 'contain' }}/>
+        <div className="admin-mobile-logo" style={{ width: '100%', textAlign: 'center', alignItems: 'center', justifyContent: 'center', paddingTop: 24 }}>
+          <img src={adminLogoImg} alt="FOFiTOS Admin" style={{ width: '85%', objectFit: 'contain' }}/>
         </div>
 
         <HoverCard>
