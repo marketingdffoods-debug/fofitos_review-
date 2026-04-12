@@ -181,7 +181,6 @@ function NotificationPanel({ reviews, onClearAll, onClose }) {
       <div style={{ maxHeight:340, overflowY:'auto' }}>
         {reviews.length === 0 ? (
           <div style={{ padding:'28px 16px', textAlign:'center', color:'#9CA3AF', fontSize:'0.82rem' }}>
-            <div style={{ fontSize:'1.8rem', marginBottom:6 }}>🔔</div>
             No new notifications
           </div>
         ) : (
