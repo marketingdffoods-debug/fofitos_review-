@@ -182,7 +182,7 @@ export default function DetailPage() {
 
   /* ── 5-second macro reveal ── */
   useEffect(() => {
-    const t = setTimeout(() => setMacrosRevealed(true), 5000)
+    const t = setTimeout(() => setMacrosRevealed(true), 3000)
     return () => clearTimeout(t)
   }, [])
 
