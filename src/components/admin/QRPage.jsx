@@ -12,8 +12,8 @@ import { sb } from '../../lib/supabase'
 const HOST = 'https://www.fofitos.com'
 
 const QR_CARDS = [
-  { id: '1', label: 'QR Code 1', redirectUrl: `${HOST}/go/1` },
-  { id: '2', label: 'QR Code 2', redirectUrl: `${HOST}/go/2` },
+  { id: '1', label: 'QR Code 1', redirectUrl: HOST },
+  { id: '2', label: 'QR Code 2', redirectUrl: HOST },
 ]
 
 async function buildQR(url) {
