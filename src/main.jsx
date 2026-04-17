@@ -11,41 +11,53 @@ function isFofitos(url) {
   return !url || url.trim() === '' || url.includes('fofitos.com')
 }
 
-function getCached() {
+function getCached(qrId) {
   try {
-    const c = JSON.parse(localStorage.getItem(CACHE_KEY))
+    const c = JSON.parse(localStorage.getItem(CACHE_KEY + qrId))
     if (c && Date.now() - c.ts < CACHE_TTL) return c.url
   } catch {}
   return null // cache miss
 }
 
-export function setQRCache(url) {
-  localStorage.setItem(CACHE_KEY, JSON.stringify({ url: url || '', ts: Date.now() }))
+export function setQRCache(qrId, url) {
+  localStorage.setItem(CACHE_KEY + qrId, JSON.stringify({ url: url || '', ts: Date.now() }))
 }
 
-// ── 1. Synchronous cache check — happens BEFORE React loads ──
-const cached = getCached()
-if (cached !== null && !isFofitos(cached)) {
-  // Instant redirect from cache — React never even starts
-  window.location.replace(cached)
-} else {
-  // ── 2. No cache hit — start React, fetch from Supabase in background ──
-  if (cached === null) {
-    // Cache miss: fetch from Supabase to populate cache for next scan
-    sb.from('qr_links').select('url').eq('id', '1').single()
-      .then(({ data }) => {
-        const dest = data?.url?.trim() || ''
-        setQRCache(dest)
-        if (!isFofitos(dest)) {
-          window.location.replace(dest)
-        }
-      })
-      .catch(() => setQRCache(''))
-  }
+export function clearQRCache(qrId) {
+  localStorage.removeItem(CACHE_KEY + qrId)
+}
 
+// Only redirect if URL has ?qr= param (i.e. actually scanned from QR code)
+const params = new URLSearchParams(window.location.search)
+const qrId   = params.get('qr') // '1', '2', or null
+
+if (qrId) {
+  // ── Came from QR scan ── check for redirect
+  const cached = getCached(qrId)
+
+  if (cached !== null && !isFofitos(cached)) {
+    // Instant redirect from cache — React never starts
+    window.location.replace(cached)
+  } else {
+    // No cache or no redirect — still render app, but fetch in background to warm cache
+    if (cached === null) {
+      sb.from('qr_links').select('url').eq('id', qrId).single()
+        .then(({ data }) => {
+          const dest = data?.url?.trim() || ''
+          setQRCache(qrId, dest)
+          if (!isFofitos(dest)) {
+            window.location.replace(dest)
+          }
+        })
+        .catch(() => setQRCache(qrId, ''))
+    }
+    createRoot(document.getElementById('root')).render(
+      <StrictMode><App /></StrictMode>
+    )
+  }
+} else {
+  // ── Normal visit (typed URL / bookmark / link) — never redirect ──
   createRoot(document.getElementById('root')).render(
-    <StrictMode>
-      <App />
-    </StrictMode>,
+    <StrictMode><App /></StrictMode>
   )
 }

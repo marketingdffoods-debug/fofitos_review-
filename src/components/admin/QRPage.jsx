@@ -4,21 +4,22 @@ import fofitosLogo from '../../assets/qr.png'
 import { sb } from '../../lib/supabase'
 
 // Clear the QR redirect cache so next scan picks up the new destination immediately
-function clearQRCache() {
-  localStorage.removeItem('fofitos_qr_dest_v1')
+function clearQRCache(id) {
+  localStorage.removeItem('fofitos_qr_dest_v1' + id)
 }
 
 /*
-  QR encodes https://www.fofitos.com/go/1 (or /go/2) permanently.
-  The destination URL is stored in Supabase and can be changed anytime.
-  Scanning the QR → /go/1 → Supabase lookup → redirect to destination.
+  QR encodes https://www.fofitos.com/?qr=1 (hidden param, only present on QR scans).
+  Regular visitors typing www.fofitos.com are NEVER redirected.
+  Only QR scans (with ?qr=1) trigger the Supabase redirect lookup.
+  Display always shows https://www.fofitos.com (clean, no ?qr= shown).
 */
 
 const HOST = 'https://www.fofitos.com'
 
 const QR_CARDS = [
-  { id: '1', label: 'QR Code 1', redirectUrl: HOST },
-  { id: '2', label: 'QR Code 2', redirectUrl: HOST },
+  { id: '1', label: 'QR Code 1', redirectUrl: `${HOST}/?qr=1` },
+  { id: '2', label: 'QR Code 2', redirectUrl: `${HOST}/?qr=2` },
 ]
 
 async function buildQR(url) {
@@ -81,7 +82,7 @@ function QRCard({ id, label, redirectUrl }) {
     setSaving(false)
     if (!error) {
       setDest(trimmed)
-      clearQRCache() // force fresh lookup on next scan
+      clearQRCache(id) // force fresh lookup on next scan
       setSaved_(true)
       setTimeout(() => setSaved_(false), 2000)
     } else alert('Save failed: ' + error.message)
