@@ -86,6 +86,81 @@ function DonutChart({ pro, fat, carb, fibre, cal, revealed = false }) {
   )
 }
 
+/* ── Overall Score card ── */
+function OverallScore({ rating, reviews }) {
+  const target = Math.round(((rating || 0) / 5) * 100)
+  const [count, setCount]     = useState(0)
+  const [entered, setEntered] = useState(false)
+
+  useEffect(() => {
+    const t = setTimeout(() => setEntered(true), 80)
+    return () => clearTimeout(t)
+  }, [])
+
+  useEffect(() => {
+    if (!entered) return
+    let cur = 0
+    const step = target / 50
+    const id = setInterval(() => {
+      cur += step
+      if (cur >= target) { setCount(target); clearInterval(id) }
+      else setCount(Math.floor(cur))
+    }, 20)
+    return () => clearInterval(id)
+  }, [entered, target])
+
+  return (
+    <div style={{
+      position:'relative', overflow:'hidden',
+      background:'linear-gradient(135deg,#5B21B6 0%,#7C3AED 100%)',
+      borderRadius:14, padding:'14px 16px', marginTop:12,
+      animation:'scoreCardIn 0.5s ease-out both',
+    }}>
+      {/* Top-right blob */}
+      <div style={{
+        position:'absolute', top:-22, right:-22,
+        width:80, height:80, borderRadius:'50%',
+        background:'rgba(167,139,250,0.22)',
+        animation:'blobFloat 3s ease-in-out infinite',
+        pointerEvents:'none',
+      }}/>
+      {/* Smaller inner blob */}
+      <div style={{
+        position:'absolute', top:-6, right:-6,
+        width:38, height:38, borderRadius:'50%',
+        background:'rgba(196,181,253,0.15)',
+        animation:'blobFloat 3s 0.6s ease-in-out infinite',
+        pointerEvents:'none',
+      }}/>
+
+      {/* Title */}
+      <div style={{fontSize:'0.52rem',fontWeight:800,letterSpacing:'2.5px',color:'rgba(196,181,253,0.65)',textTransform:'uppercase',marginBottom:7,position:'relative',zIndex:1}}>
+        Overall Score
+      </div>
+
+      {/* Score */}
+      <div style={{display:'flex',alignItems:'baseline',gap:4,position:'relative',zIndex:1}}>
+        <span style={{fontSize:'2.1rem',fontWeight:800,color:'#fff',lineHeight:1}}>{count}</span>
+        <span style={{fontSize:'0.95rem',fontWeight:600,color:'rgba(196,181,253,0.55)'}}>/100</span>
+      </div>
+
+      {/* Secondary line + shimmer */}
+      <div style={{position:'relative',overflow:'hidden',marginTop:6,zIndex:1}}>
+        <div style={{fontSize:'0.62rem',color:'rgba(196,181,253,0.55)',lineHeight:1.4}}>
+          Based on {reviews || 0} customer reviews
+        </div>
+        <div style={{
+          position:'absolute',inset:0,
+          background:'linear-gradient(105deg,transparent 30%,rgba(255,255,255,0.35) 50%,transparent 70%)',
+          animation:'shimmerOnce 1s 0.6s ease-out forwards',
+          transform:'translateX(-150%)',
+          pointerEvents:'none',
+        }}/>
+      </div>
+    </div>
+  )
+}
+
 /* ── Macro icon SVGs ── */
 function FlameIcon({ color }) {
   return (
@@ -214,6 +289,23 @@ export default function DetailPage() {
     fetchReviews()
   }, [productId, fetchReviews])
 
+  /* ── Next product navigation ── */
+  const navList = savedProducts.length ? savedProducts : allProducts
+  const currentIdx = navList.findIndex(x => String(x.id) === String(productId))
+  const hasNext = currentIdx !== -1 && currentIdx < navList.length - 1
+  const hasPrev = currentIdx > 0
+
+  async function goToProduct(offset) {
+    if (leavingRef.current) return
+    const next = navList[currentIdx + offset]
+    if (!next) return
+    const { data: nextProd } = await sb.from('products').select('*').eq('id', next.id).single()
+    if (!nextProd) return
+    nav(`/product/${next.id}`, {
+      state: { product: nextProd, cat: savedCat, products: savedProducts }
+    })
+  }
+
   /* helpers for conditional animation — instant when from carousel */
   const heroAnim    = fromCarousel ? 'none' : undefined
   const contentAnim = (base, delay) =>
@@ -255,6 +347,17 @@ export default function DetailPage() {
           100% { background: rgba(0,0,0,0.52); }
         }
         .dp-scroll::-webkit-scrollbar { display:none; }
+        .dp-mobile-layout { display:block; }
+        .dp-desktop-layout { display:none; }
+        @media (min-width:900px) {
+          .dp-mobile-layout { display:none !important; }
+          .dp-desktop-layout { display:block; zoom:0.8; }
+        }
+        .dp-right-scroll::-webkit-scrollbar { display:none; }
+        .dp-right-scroll { -ms-overflow-style:none; scrollbar-width:none; }
+        @keyframes scoreCardIn  { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes blobFloat    { 0%,100% { transform:scale(1) translateY(0); } 50% { transform:scale(1.08) translateY(-4px); } }
+        @keyframes shimmerOnce  { from { transform:translateX(-150%); } to { transform:translateX(250%); } }
         @keyframes macroShine {
           0%   { transform: translateX(-160%) skewX(-15deg); }
           55%, 100% { transform: translateX(320%) skewX(-15deg); }
@@ -271,7 +374,8 @@ export default function DetailPage() {
           if (leavingRef.current) return
           leavingRef.current = true
           setLeaving(true)
-          setTimeout(() => nav('/', { state: { restoreCat: savedCat, carouselProducts: savedProducts, restoreProductId: product?.id } }), 520)
+          const isDesktop = window.innerWidth >= 900
+          setTimeout(() => nav('/', { state: { restoreCat: savedCat, carouselProducts: savedProducts, restoreProductId: product?.id } }), isDesktop ? 0 : 520)
         }}
         style={{
           position: 'fixed', top: 16, left: 16, zIndex: 999,
@@ -290,7 +394,7 @@ export default function DetailPage() {
 
       <div
         ref={scrollRef}
-        className="dp-scroll"
+        className="dp-scroll dp-mobile-layout"
         style={{
           overflowY: leaving ? 'hidden' : 'auto',
           height:'100dvh',
@@ -319,14 +423,16 @@ export default function DetailPage() {
           </div>
 
           <div style={{
-            background:'linear-gradient(145deg,#7B2CBF 0%,#4C1D95 100%)',
+            background:'linear-gradient(135deg,#5B21B6 0%,#7C3AED 100%)',
             borderRadius: 22, padding:'90px 20px 24px',
             position:'relative', overflow:'hidden',
             animation: heroAnim ?? 'cardUp 0.45s 0.05s cubic-bezier(0.22,1,0.36,1) both',
             willChange: 'transform',
           }}>
-            <div style={{position:'absolute',top:-30,right:-20,width:130,height:130,borderRadius:'50%',background:'rgba(167,139,250,0.25)',filter:'blur(35px)',pointerEvents:'none'}}/>
+            <div style={{position:'absolute',top:-28,right:-28,width:120,height:120,borderRadius:'50%',background:'rgba(196,181,253,0.18)',pointerEvents:'none',animation:'blobFloat 3s ease-in-out infinite'}}/>
             <div style={{position:'absolute',bottom:-20,left:-10,width:100,height:100,borderRadius:'50%',background:'rgba(91,33,182,0.35)',filter:'blur(25px)',pointerEvents:'none'}}/>
+            <div style={{position:'absolute',inset:0,background:'linear-gradient(110deg,transparent 30%,rgba(255,255,255,0.08) 50%,transparent 70%)',animation:'shimmerOnce 1.4s 0.2s ease-out forwards',transform:'translateX(-150%)',pointerEvents:'none',zIndex:1}}/>
+
             <div style={{position:'relative',zIndex:2}}>
               <div style={{fontSize:'clamp(1.25rem,5vw,1.6rem)',fontWeight:800,color:'#fff',lineHeight:1.3,marginBottom:6}}>
                 {(() => {
@@ -515,10 +621,215 @@ export default function DetailPage() {
             </div>
           ))}
         </div>
+
+        {/* ══ FOOTER ══ */}
+        <div style={{margin:'16px 16px 0',padding:'20px 18px 28px',borderTop:'1px solid rgba(0,0,0,0.07)',animation:contentAnim('fadeUp',0.64)}}>
+          <div style={{fontSize:'0.58rem',fontWeight:600,letterSpacing:'2px',textTransform:'uppercase',color:'#bbb',marginBottom:6}}>A Product Of</div>
+          <div style={{fontSize:'0.85rem',fontWeight:700,color:'#888',lineHeight:1.3,marginBottom:14}}>Doctor Farmer Foods Private Limited</div>
+          <div style={{display:'flex',flexDirection:'column',gap:8}}>
+            <a href="tel:+918925841987" style={{display:'flex',alignItems:'center',gap:8,textDecoration:'none'}}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg>
+              <span style={{fontSize:'0.73rem',color:'#aaa',fontWeight:400}}>+91 89258 41987 &nbsp;·&nbsp; +91 89258 41983</span>
+            </a>
+            <a href="mailto:doctorfarmerfoods@gmail.com" style={{display:'flex',alignItems:'center',gap:8,textDecoration:'none'}}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <span style={{fontSize:'0.73rem',color:'#aaa',fontWeight:400}}>doctorfarmerfoods@gmail.com</span>
+            </a>
+            <a href="https://doctorfarmerfoods.com" target="_blank" rel="noreferrer" style={{display:'flex',alignItems:'center',gap:8,textDecoration:'none'}}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+              <span style={{fontSize:'0.73rem',color:'#aaa',fontWeight:400}}>doctorfarmerfoods.com</span>
+            </a>
+          </div>
+          <div style={{marginTop:16,fontSize:'0.58rem',color:'#ccc',textAlign:'center',letterSpacing:'0.3px'}}>
+            © {new Date().getFullYear()} Doctor Farmer Foods Pvt. Ltd. All rights reserved.
+          </div>
+        </div>
       </div>
 
-      {/* ══ SWIPE-DOWN EXIT OVERLAY — reverse transition back to carousel ══ */}
-      {leaving && p && (
+      {/* ══ DESKTOP LAYOUT ══ */}
+      <div className="dp-desktop-layout" style={{ background:'#F2EFF8' }}>
+        <div style={{ maxWidth:1160, margin:'0 auto', padding:'28px 32px 48px', display:'grid', gridTemplateColumns:'1fr 1fr', gap:24, alignItems:'start' }}>
+
+            {/* ════ LEFT COLUMN — sticky product info ════ */}
+            <div style={{ display:'flex', flexDirection:'column', gap:14, position:'sticky', top:28 }}>
+
+              {/* Purple product card */}
+              <div style={{
+                background:'linear-gradient(135deg,#5B21B6 0%,#7C3AED 100%)',
+                borderRadius:18, padding:'22px 24px',
+                display:'flex', gap:20, alignItems:'flex-start',
+                position:'relative', overflow:'hidden',
+                boxShadow:'0 8px 32px rgba(76,29,149,0.35)',
+              }}>
+                {/* Bubble accent */}
+                <div style={{position:'absolute',top:-28,right:-28,width:130,height:130,borderRadius:'50%',background:'rgba(196,181,253,0.18)',pointerEvents:'none',animation:'blobFloat 3s ease-in-out infinite'}}/>
+                <div style={{position:'absolute',bottom:-20,left:-10,width:110,height:110,borderRadius:'50%',background:'rgba(91,33,182,0.25)',filter:'blur(28px)',pointerEvents:'none'}}/>
+                <div style={{position:'absolute',inset:0,background:'linear-gradient(110deg,transparent 30%,rgba(255,255,255,0.08) 50%,transparent 70%)',animation:'shimmerOnce 1.4s 0.2s ease-out forwards',transform:'translateX(-150%)',pointerEvents:'none',zIndex:1}}/>
+                <img src={p.img} alt={p.name} style={{ width:120, height:120, objectFit:'contain', flexShrink:0, filter:'drop-shadow(0 10px 28px rgba(0,0,0,0.55))', position:'relative', zIndex:2 }}/>
+                <div style={{ flex:1, minWidth:0, position:'relative', zIndex:2 }}>
+                  <div style={{ fontSize:'0.58rem', fontWeight:700, letterSpacing:'2.5px', textTransform:'uppercase', color:'rgba(196,181,253,0.7)', marginBottom:6 }}>FOFITOS KITCHEN</div>
+                  <div style={{ fontSize:'clamp(1.25rem,2vw,1.6rem)', fontWeight:800, color:'#fff', lineHeight:1.2, marginBottom:5 }}>{p.name}</div>
+                  {p.tagline && <div style={{ fontSize:'0.76rem', color:'rgba(196,181,253,0.8)', lineHeight:1.4, marginBottom:12 }}>{p.tagline}</div>}
+                  <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:14 }}>
+                    <span style={{ color:'#FBBF24', fontSize:'0.85rem', letterSpacing:1 }}>{starStr(p.rating||0)}</span>
+                    <span style={{ fontWeight:700, color:'#fff', fontSize:'0.82rem' }}>{p.rating}</span>
+                    <span style={{ color:'rgba(255,255,255,0.45)', fontSize:'0.73rem' }}>({p.reviews})</span>
+                  </div>
+                  <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
+                    {(p.tags||[]).map(t => (
+                      <span key={t} style={{ fontSize:'0.6rem', fontWeight:700, letterSpacing:'0.5px', color:'rgba(255,255,255,0.9)', border:'1.5px solid rgba(255,255,255,0.3)', borderRadius:50, padding:'3px 11px', background:'rgba(255,255,255,0.1)' }}>{t}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Stats row */}
+              <div style={{ background:'#fff', borderRadius:16, overflow:'hidden', boxShadow:'0 1px 8px rgba(76,29,149,0.08)', display:'grid', gridTemplateColumns:'1fr 1fr 1fr' }}>
+                {[
+                  { val:p.cal,  unit:'kcal', label:'Calories' },
+                  { val:p.pro,  unit:'g',    label:'Protein'  },
+                  { val:p.carb, unit:'g',    label:'Carbs'    },
+                ].map((m,i) => (
+                  <div key={m.label} style={{ padding:'20px 12px', textAlign:'center', borderRight: i < 2 ? '1px solid #EDE8F8' : 'none' }}>
+                    <div>
+                      <span style={{ fontSize:'1.65rem', fontWeight:800, color:'#1a1a2e' }}>{m.val??'—'}</span>
+                      <span style={{ fontSize:'0.66rem', color:'#bbb', marginLeft:3 }}>{m.unit}</span>
+                    </div>
+                    <div style={{ fontSize:'0.7rem', color:'#aaa', marginTop:4 }}>{m.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Buttons — below stats */}
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12 }}>
+                <button style={{ height:50, background:'#fff', border:'1.5px solid #FFDAD8', borderRadius:12, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 2px 10px rgba(226,36,26,0.1)' }}>
+                  <img src={zomatoImg} alt="Zomato" style={{ height:26, objectFit:'contain' }}/>
+                </button>
+                <button style={{ height:50, background:'#fff', border:'1.5px solid #FFE0C8', borderRadius:12, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 2px 10px rgba(252,128,25,0.1)' }}>
+                  <img src={swiggyImg} alt="Swiggy" style={{ height:26, objectFit:'contain' }}/>
+                </button>
+                <button onClick={() => setModal(true)} style={{ height:50, background:'#fff', color:'#4C1D95', border:'2px solid #DDD6FE', borderRadius:12, fontSize:'0.82rem', fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
+                  <span style={{ color:'#FBBF24' }}>★</span> Write a Review
+                </button>
+              </div>
+
+              {/* Fofitos Promise — purple theme */}
+              <div style={{ background:'linear-gradient(135deg,#5B21B6 0%,#7C3AED 100%)', borderRadius:16, padding:'22px 24px', boxShadow:'0 4px 20px rgba(76,29,149,0.28)' }}>
+                <div style={{ fontSize:'1.05rem', fontWeight:700, color:'#C4B5FD', marginBottom:16 }}>The Fofitos Promise</div>
+                {['Zero refined oil — cold-pressed only','No MSG or flavour enhancers','No Maida — whole grain always','No artificial colours or preservatives'].map(item => (
+                  <div key={item} style={{ display:'flex', alignItems:'flex-start', gap:12, marginBottom:12 }}>
+                    <div style={{ width:22, height:22, borderRadius:'50%', background:'rgba(167,139,250,0.18)', border:'1.5px solid rgba(167,139,250,0.5)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                      <span style={{ color:'#A78BFA', fontSize:'0.6rem', fontWeight:800 }}>✓</span>
+                    </div>
+                    <span style={{ fontSize:'0.82rem', color:'rgba(221,214,254,0.9)', lineHeight:1.55 }}>{item}</span>
+                  </div>
+                ))}
+              </div>
+
+            </div>
+
+            {/* ════ RIGHT COLUMN — scrollable nutrition data ════ */}
+            <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+
+              {/* Calorie Breakdown */}
+              <div style={{ background:'#fff', borderRadius:16, padding:'20px 22px', boxShadow:'0 1px 8px rgba(76,29,149,0.07)' }}>
+                <div style={{ fontSize:'0.63rem', fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', color:'#C4B5FD', marginBottom:16 }}>Calorie Breakdown</div>
+                <DonutChart pro={p.pro} fat={p.fat} carb={p.carb} fibre={p.fibre} cal={p.cal} revealed={chartIn}/>
+              </div>
+
+              {/* Nutrition Facts */}
+              {(p.nutrition||[]).length > 0 && (
+                <div style={{ background:'#fff', borderRadius:16, padding:'20px 22px', boxShadow:'0 1px 8px rgba(76,29,149,0.07)' }}>
+                  <div style={{ fontSize:'0.63rem', fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', color:'#C4B5FD', marginBottom:16 }}>Nutrition Facts · Per Serving</div>
+                  {(p.nutrition||[]).map((n,i) => (
+                    <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 0', borderBottom:'1px solid #F3F0FB' }}>
+                      <span style={{ fontSize:n.s?'0.71rem':'0.78rem', color:n.s?'#ccc':'#444', fontWeight:n.s?400:500, width:160, flexShrink:0, paddingLeft:n.s?14:0 }}>{n.n}</span>
+                      <div style={{ flex:1, height:5, background:'#EDE8F8', borderRadius:3, overflow:'hidden' }}>
+                        <div style={{ width:chartIn?`${n.p}%`:'0%', height:'100%', background:n.c||'#7B2CBF', borderRadius:3, transition:chartIn?`width 0.7s ${i*0.06}s cubic-bezier(0.22,1,0.36,1)`:'none' }}/>
+                      </div>
+                      <span style={{ fontSize:'0.76rem', fontWeight:600, color:'#1a1a2e', width:46, textAlign:'right', flexShrink:0 }}>{n.v}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Ingredients */}
+              {(p.ingr||[]).length > 0 && (
+                <div style={{ background:'#fff', borderRadius:16, padding:'20px 22px', boxShadow:'0 1px 8px rgba(76,29,149,0.07)' }}>
+                  <div style={{ fontSize:'0.63rem', fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', color:'#C4B5FD', marginBottom:14 }}>Ingredients Used</div>
+                  {(p.ingr||[]).map((ing,i) => (
+                    <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'9px 12px', borderRadius:10, background:'#FAF8FF', border:'1px solid #EDE8F8', marginBottom:6 }}>
+                      <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                        <span style={{ width:8, height:8, borderRadius:'50%', background:ing.c||'#7B2CBF', display:'inline-block', flexShrink:0 }}/>
+                        <span style={{ fontSize:'0.82rem', fontWeight:500, color:'#1a1a2e' }}>{ing.n}</span>
+                      </div>
+                      <span style={{ fontSize:'0.72rem', color:'#bbb' }}>{ing.src}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Reviews */}
+              {allRevs.length > 0 && (
+                <div style={{ background:'#fff', borderRadius:16, padding:'20px 22px', boxShadow:'0 1px 8px rgba(76,29,149,0.07)' }}>
+                  <div style={{ fontSize:'0.63rem', fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', color:'#C4B5FD', marginBottom:14 }}>What Customers Say</div>
+                  <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                    {allRevs.map((r,i) => {
+                      const ini = r.ini||(r.name?r.name[0]:'?')
+                      const bg  = r.bg||avatarColor(r.name||'A')
+                      const date= r.date||(r.created_at?new Date(r.created_at).toLocaleDateString():'')
+                      return (
+                        <div key={i} style={{ borderRadius:12, padding:'14px', border:'1px solid #EDE8F8', background:'#FAF8FF' }}>
+                          <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:6 }}>
+                            <div style={{ width:32, height:32, borderRadius:'50%', background:bg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.72rem', fontWeight:700, color:'#fff', flexShrink:0 }}>{ini}</div>
+                            <div>
+                              <div style={{ fontSize:'0.82rem', fontWeight:700, color:'#1a1a2e' }}>{r.name}</div>
+                              <div style={{ fontSize:'0.67rem', color:'#ccc' }}>{date}</div>
+                            </div>
+                          </div>
+                          <div style={{ color:'#F59E0B', fontSize:'0.78rem', marginBottom:4 }}>{starStr(r.stars||r.rating)}</div>
+                          <div style={{ fontSize:'0.78rem', color:'#666', lineHeight:1.5 }}>{r.txt||r.text}</div>
+                          {(r.v||r.verified) && <span style={{ display:'inline-flex', alignItems:'center', gap:4, marginTop:6, padding:'2px 8px', borderRadius:50, background:'rgba(123,44,191,0.08)', fontSize:'0.65rem', color:'#7B2CBF', fontWeight:600 }}>✓ Verified Order</span>}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+        </div>
+
+        {/* ══ FOOTER (desktop) ══ */}
+        <div style={{ maxWidth:1160, margin:'0 auto', padding:'0 32px 48px' }}>
+          <div style={{borderTop:'1px solid rgba(0,0,0,0.07)',padding:'24px 0 0',display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:16}}>
+            <div>
+              <div style={{fontSize:'0.58rem',fontWeight:600,letterSpacing:'2px',textTransform:'uppercase',color:'#bbb',marginBottom:5}}>A Product Of</div>
+              <div style={{fontSize:'0.9rem',fontWeight:700,color:'#888'}}>Doctor Farmer Foods Private Limited</div>
+            </div>
+            <div style={{display:'flex',gap:20,flexWrap:'wrap',alignItems:'center'}}>
+              <a href="tel:+918925841987" style={{display:'flex',alignItems:'center',gap:6,textDecoration:'none'}}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg>
+                <span style={{fontSize:'0.76rem',color:'#aaa',fontWeight:400}}>+91 89258 41987 · +91 89258 41983</span>
+              </a>
+              <a href="mailto:doctorfarmerfoods@gmail.com" style={{display:'flex',alignItems:'center',gap:6,textDecoration:'none'}}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <span style={{fontSize:'0.76rem',color:'#aaa',fontWeight:400}}>doctorfarmerfoods@gmail.com</span>
+              </a>
+              <a href="https://doctorfarmerfoods.com" target="_blank" rel="noreferrer" style={{display:'flex',alignItems:'center',gap:6,textDecoration:'none'}}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+                <span style={{fontSize:'0.76rem',color:'#aaa',fontWeight:400}}>doctorfarmerfoods.com</span>
+              </a>
+            </div>
+            <div style={{width:'100%',paddingTop:14,borderTop:'1px solid rgba(0,0,0,0.06)',fontSize:'0.58rem',color:'#ccc',textAlign:'center'}}>
+              © {new Date().getFullYear()} Doctor Farmer Foods Pvt. Ltd. All rights reserved.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ══ SWIPE-DOWN EXIT OVERLAY — reverse transition back to carousel (mobile only) ══ */}
+      {leaving && p && window.innerWidth < 900 && (
         <>
           {/* Two-layer cover: solid instant hide + animated dark fade */}
           {/* Layer 1: immediately opaque — hides page content on first render frame */}
@@ -550,7 +861,7 @@ export default function DetailPage() {
             position:'fixed', top:185, left:16, right:16,
             zIndex:213, pointerEvents:'none',
             animation:'cardDown 0.45s 0.06s cubic-bezier(0.4,0,1,1) both',
-            background:'linear-gradient(145deg,#7B2CBF 0%,#4C1D95 100%)',
+            background:'linear-gradient(135deg,#5B21B6 0%,#7C3AED 100%)',
             borderRadius:22, padding:'90px 20px 24px', overflow:'hidden',
             willChange: 'transform',
           }}>

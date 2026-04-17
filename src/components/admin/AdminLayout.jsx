@@ -1,24 +1,28 @@
 import { useState, useRef, useEffect } from 'react'
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { sb } from '../../lib/supabase'
 import '../../styles/admin.css'
 
-const NAV_ITEMS = [
+const MODULES = [
   {
-    to: '/admin', label: 'Dashboard', end: true,
+    id: 'dashboard',
+    label: 'Dashboard',
+    path: '/admin',
     icon: (
-      <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
-        <rect x="3" y="3" width="8" height="8" rx="1.5" fill="currentColor"/>
-        <rect x="13" y="3" width="8" height="8" rx="1.5" fill="currentColor" opacity=".4"/>
-        <rect x="3" y="13" width="8" height="8" rx="1.5" fill="currentColor" opacity=".4"/>
-        <rect x="13" y="13" width="8" height="8" rx="1.5" fill="currentColor"/>
+      <svg width="17" height="17" fill="none" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="8" height="8" rx="2" stroke="currentColor" strokeWidth="2"/>
+        <rect x="13" y="3" width="8" height="8" rx="2" stroke="currentColor" strokeWidth="2"/>
+        <rect x="3" y="13" width="8" height="8" rx="2" stroke="currentColor" strokeWidth="2"/>
+        <rect x="13" y="13" width="8" height="8" rx="2" stroke="currentColor" strokeWidth="2"/>
       </svg>
     ),
   },
   {
-    to: '/admin/products', label: 'Products',
+    id: 'products',
+    label: 'Products',
+    path: '/admin/products',
     icon: (
-      <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+      <svg width="17" height="17" fill="none" viewBox="0 0 24 24">
         <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
         <path d="M3 6h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
         <path d="M16 10a4 4 0 01-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
@@ -26,21 +30,38 @@ const NAV_ITEMS = [
     ),
   },
   {
-    to: '/admin/categories', label: 'Categories',
+    id: 'categories',
+    label: 'Categories',
+    path: '/admin/categories',
     icon: (
-      <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
-        <rect x="3" y="3" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="2"/>
-        <rect x="13" y="3" width="8" height="5" rx="1.5" stroke="currentColor" strokeWidth="2"/>
-        <rect x="13" y="11" width="8" height="10" rx="1.5" stroke="currentColor" strokeWidth="2"/>
-        <rect x="3" y="14" width="8" height="7" rx="1.5" stroke="currentColor" strokeWidth="2"/>
+      <svg width="17" height="17" fill="none" viewBox="0 0 24 24">
+        <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
       </svg>
     ),
   },
   {
-    to: '/admin/reviews', label: 'Reviews',
+    id: 'reviews',
+    label: 'Reviews',
+    path: '/admin/reviews',
     icon: (
-      <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+      <svg width="17" height="17" fill="none" viewBox="0 0 24 24">
         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+      </svg>
+    ),
+  },
+  {
+    id: 'qr',
+    label: 'QR Code',
+    path: '/admin/qr',
+    icon: (
+      <svg width="17" height="17" fill="none" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2"/>
+        <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2"/>
+        <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2"/>
+        <rect x="14" y="14" width="3" height="3" fill="currentColor"/>
+        <rect x="18" y="14" width="3" height="3" fill="currentColor"/>
+        <rect x="14" y="18" width="3" height="3" fill="currentColor"/>
+        <rect x="18" y="18" width="3" height="3" fill="currentColor"/>
       </svg>
     ),
   },
@@ -207,15 +228,21 @@ function NotificationPanel({ reviews, onClearAll, onClose }) {
 const CLEARED_KEY = 'fofitos_notif_cleared_at'
 
 export default function AdminLayout() {
-  const [open,           setOpen]           = useState(true)
   const [dropdownOpen,   setDropdownOpen]   = useState(false)
   const [notifOpen,      setNotifOpen]      = useState(false)
   const [changePassOpen, setChangePassOpen] = useState(false)
   const [reviews,        setReviews]        = useState([])
 
-  const navigate    = useNavigate()
+  const navigate   = useNavigate()
+  const location   = useLocation()
   const dropdownRef = useRef(null)
   const notifRef    = useRef(null)
+
+  /* ── Determine current active module ── */
+  const isActive = (path) => {
+    if (path === '/admin') return location.pathname === '/admin'
+    return location.pathname.startsWith(path)
+  }
 
   /* ── Load reviews newer than last clear time ── */
   useEffect(() => {
@@ -264,149 +291,126 @@ export default function AdminLayout() {
   return (
     <div className="admin-layout">
 
-      {/* ── Sidebar ── */}
-      <aside className={`sidebar${open ? '' : ' sidebar-closed'}`}>
-        <div className="sidebar-logo">
-          <div className="sidebar-brand-text">
-            <div className="sidebar-logo-title">FOFiTOS</div>
-            <div className="sidebar-logo-sub">Admin Panel</div>
-          </div>
-          <button className="sidebar-hamburger" onClick={() => setOpen(false)} title="Collapse sidebar">
-            <HamburgerIcon />
-          </button>
+      {/* ── Floating Top Panel ── */}
+      <div className="floating-panel-wrapper">
+      <header className="modern-top-panel">
+        <div className="panel-left">
+          <div className="panel-logo">FOFiTOS</div>
         </div>
 
-        <nav className="sidebar-nav">
-          {NAV_ITEMS.map(item => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
-              onClick={() => { if (window.innerWidth <= 768) setOpen(false) }}
+        {/* Module Buttons */}
+        <div className="panel-modules">
+          {MODULES.map(module => (
+            <button
+              key={module.id}
+              onClick={() => navigate(module.path)}
+              className={`module-btn${isActive(module.path) ? ' active' : ''}`}
+              title={module.label}
             >
-              <span className="nav-icon">{item.icon}</span>
-              <span className="nav-label">{item.label}</span>
-            </NavLink>
+              <span className="module-icon">{module.icon}</span>
+              <span className="module-label">{module.label}</span>
+            </button>
           ))}
-        </nav>
+        </div>
 
-        <div className="sidebar-footer">
-          <button className="view-site-btn" onClick={() => navigate('/')}>
-            <svg width="13" height="13" fill="none" viewBox="0 0 24 24">
-              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+        {/* Right side actions */}
+        <div className="panel-right">
+          <button className="panel-action-btn" onClick={() => navigate('/')} title="View customer menu">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            View Menu
           </button>
-        </div>
-      </aside>
 
-      {/* ── Main area ── */}
-      <div className="admin-main">
-
-        {/* Topbar */}
-        <header className="admin-topbar">
-          <button
-            className={`topbar-hamburger${open ? ' topbar-hamburger--hidden' : ''}`}
-            onClick={() => setOpen(true)}
-            title="Open sidebar"
-          >
-            <HamburgerIcon />
-          </button>
-          <div style={{ flex: 1 }} />
-          <div className="topbar-actions">
-
-            {/* ── Notification Bell ── */}
-            <div ref={notifRef} style={{ position:'relative' }}>
-              <button
-                className="topbar-icon-btn"
-                title="Notifications"
-                onClick={() => { setNotifOpen(v => !v); setDropdownOpen(false) }}
-                style={{ position:'relative' }}
-              >
-                <svg width="17" height="17" fill="none" viewBox="0 0 24 24">
-                  <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                {reviews.length > 0 && (
-                  <span style={{
-                    position:'absolute', top:4, right:4,
-                    width:8, height:8, borderRadius:'50%',
-                    background:'#DC2626', border:'2px solid #fff',
-                  }}/>
-                )}
-              </button>
-              {notifOpen && (
-                <NotificationPanel
-                  reviews={reviews}
-                  onClearAll={handleClearAll}
-                  onClose={() => setNotifOpen(false)}
-                />
+          {/* ── Notification Bell ── */}
+          <div ref={notifRef} style={{ position:'relative' }}>
+            <button
+              className="topbar-icon-btn"
+              title="Notifications"
+              onClick={() => { setNotifOpen(v => !v); setDropdownOpen(false) }}
+              style={{ position:'relative' }}
+            >
+              <svg width="17" height="17" fill="none" viewBox="0 0 24 24">
+                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              {reviews.length > 0 && (
+                <span style={{
+                  position:'absolute', top:4, right:4,
+                  width:8, height:8, borderRadius:'50%',
+                  background:'#DC2626', border:'2px solid #fff',
+                }}/>
               )}
-            </div>
-
-            {/* ── Avatar with dropdown ── */}
-            <div ref={dropdownRef} style={{ position:'relative' }}>
-              <div
-                className="topbar-avatar"
-                onClick={() => { setDropdownOpen(v => !v); setNotifOpen(false) }}
-                style={{ cursor:'pointer', userSelect:'none' }}
-                title="Account options"
-              >
-                A
-              </div>
-
-              {dropdownOpen && (
-                <div style={{
-                  position:'absolute', top:'calc(100% + 10px)', right:0,
-                  background:'#fff', borderRadius:12, minWidth:190,
-                  boxShadow:'0 8px 32px rgba(0,0,0,0.14)', border:'1px solid #F0EBFA',
-                  overflow:'hidden', zIndex:999,
-                  animation:'fadeDropdown 0.15s ease',
-                }}>
-                  <div style={{ padding:'12px 16px', borderBottom:'1px solid #F3F4F6' }}>
-                    <div style={{ fontSize:'0.78rem', fontWeight:700, color:'#111' }}>Fofitos Marketing</div>
-                    <div style={{ fontSize:'0.7rem', color:'#9CA3AF', marginTop:1 }}>Administrator</div>
-                  </div>
-
-                  <button
-                    onClick={() => { setDropdownOpen(false); setChangePassOpen(true) }}
-                    style={{ width:'100%', padding:'11px 16px', background:'none', border:'none', textAlign:'left', cursor:'pointer', display:'flex', alignItems:'center', gap:10, fontSize:'0.85rem', color:'#374151', fontWeight:500 }}
-                    onMouseEnter={e => e.currentTarget.style.background='#F5F0FF'}
-                    onMouseLeave={e => e.currentTarget.style.background='none'}
-                  >
-                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24">
-                      <rect x="3" y="11" width="18" height="11" rx="2" stroke="#7B2CBF" strokeWidth="2"/>
-                      <path d="M7 11V7a5 5 0 0110 0v4" stroke="#7B2CBF" strokeWidth="2" strokeLinecap="round"/>
-                    </svg>
-                    Change Password
-                  </button>
-
-                  <div style={{ height:1, background:'#F3F4F6' }} />
-
-                  <button
-                    onClick={handleLogout}
-                    style={{ width:'100%', padding:'11px 16px', background:'none', border:'none', textAlign:'left', cursor:'pointer', display:'flex', alignItems:'center', gap:10, fontSize:'0.85rem', color:'#DC2626', fontWeight:500 }}
-                    onMouseEnter={e => e.currentTarget.style.background='#FEF2F2'}
-                    onMouseLeave={e => e.currentTarget.style.background='none'}
-                  >
-                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24">
-                      <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <polyline points="16 17 21 12 16 7" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <line x1="21" y1="12" x2="9" y2="12" stroke="#DC2626" strokeWidth="2" strokeLinecap="round"/>
-                    </svg>
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
-
+            </button>
+            {notifOpen && (
+              <NotificationPanel
+                reviews={reviews}
+                onClearAll={handleClearAll}
+                onClose={() => setNotifOpen(false)}
+              />
+            )}
           </div>
-        </header>
 
-        {/* Scrollable page content */}
-        <div className="admin-content-wrap">
-          <Outlet />
+          {/* ── Avatar with dropdown ── */}
+          <div ref={dropdownRef} style={{ position:'relative' }}>
+            <div
+              className="topbar-avatar"
+              onClick={() => { setDropdownOpen(v => !v); setNotifOpen(false) }}
+              style={{ cursor:'pointer', userSelect:'none' }}
+              title="Account options"
+            >
+              A
+            </div>
+
+            {dropdownOpen && (
+              <div style={{
+                position:'absolute', top:'calc(100% + 10px)', right:0,
+                background:'#fff', borderRadius:12, minWidth:190,
+                boxShadow:'0 8px 32px rgba(0,0,0,0.14)', border:'1px solid #F0EBFA',
+                overflow:'hidden', zIndex:999,
+                animation:'fadeDropdown 0.15s ease',
+              }}>
+                <div style={{ padding:'12px 16px', borderBottom:'1px solid #F3F4F6' }}>
+                  <div style={{ fontSize:'0.78rem', fontWeight:700, color:'#111' }}>Fofitos Marketing</div>
+                  <div style={{ fontSize:'0.7rem', color:'#9CA3AF', marginTop:1 }}>Administrator</div>
+                </div>
+
+                <button
+                  onClick={() => { setDropdownOpen(false); setChangePassOpen(true) }}
+                  style={{ width:'100%', padding:'11px 16px', background:'none', border:'none', textAlign:'left', cursor:'pointer', display:'flex', alignItems:'center', gap:10, fontSize:'0.85rem', color:'#374151', fontWeight:500 }}
+                  onMouseEnter={e => e.currentTarget.style.background='#F5F0FF'}
+                  onMouseLeave={e => e.currentTarget.style.background='none'}
+                >
+                  <svg width="15" height="15" fill="none" viewBox="0 0 24 24">
+                    <rect x="3" y="11" width="18" height="11" rx="2" stroke="#7B2CBF" strokeWidth="2"/>
+                    <path d="M7 11V7a5 5 0 0110 0v4" stroke="#7B2CBF" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                  Change Password
+                </button>
+
+                <div style={{ height:1, background:'#F3F4F6' }} />
+
+                <button
+                  onClick={handleLogout}
+                  style={{ width:'100%', padding:'11px 16px', background:'none', border:'none', textAlign:'left', cursor:'pointer', display:'flex', alignItems:'center', gap:10, fontSize:'0.85rem', color:'#DC2626', fontWeight:500 }}
+                  onMouseEnter={e => e.currentTarget.style.background='#FEF2F2'}
+                  onMouseLeave={e => e.currentTarget.style.background='none'}
+                >
+                  <svg width="15" height="15" fill="none" viewBox="0 0 24 24">
+                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <polyline points="16 17 21 12 16 7" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <line x1="21" y1="12" x2="9" y2="12" stroke="#DC2626" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
         </div>
+      </header>
+      </div>
+
+      {/* ── Main content area ── */}
+      <div className="admin-main-content">
+        <Outlet />
       </div>
 
       {changePassOpen && <ChangePasswordModal onClose={() => setChangePassOpen(false)} />}

@@ -175,13 +175,10 @@ export default function CategoriesPage() {
 
   return (
     <>
-      <div className="topbar">
-        <div className="topbar-title">Categories</div>
-        <div className="topbar-actions">
+      <div className="admin-content">
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
           <button className="btn btn-primary" onClick={openAdd}>+ Add Category</button>
         </div>
-      </div>
-      <div className="admin-content">
         {loading ? <div className="loading">Loading…</div> : (
           <div className="table-card">
             <div className="table-wrap">

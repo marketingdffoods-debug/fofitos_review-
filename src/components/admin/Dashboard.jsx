@@ -28,9 +28,6 @@ export default function Dashboard() {
 
   return (
     <>
-      <div className="topbar">
-        <div className="topbar-title">Dashboard</div>
-      </div>
       <div className="admin-content">
         <div className="stats-grid">
           <div className="stat-card">

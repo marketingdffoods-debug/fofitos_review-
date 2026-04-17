@@ -376,19 +376,14 @@ export default function ProductsPage() {
 
   return (
     <>
-      <div className="topbar">
-        <div className="topbar-title">Products</div>
-        <div className="topbar-actions">
-          <button className="btn btn-primary" onClick={openAdd}>+ Add Product</button>
-        </div>
-      </div>
       <div className="admin-content">
-        <div className="filter-bar">
-          <input className="filter-input" placeholder="Search products…" value={search} onChange={e => setSearch(e.target.value)} />
-          <select className="filter-select" value={filterCat} onChange={e => setFilterCat(e.target.value)}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+          <input className="filter-input" style={{ margin: 0 }} placeholder="Search products…" value={search} onChange={e => setSearch(e.target.value)} />
+          <select className="filter-select" style={{ margin: 0, flexShrink: 0 }} value={filterCat} onChange={e => setFilterCat(e.target.value)}>
             <option value="">All Categories</option>
             {cats.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
+          <button className="btn btn-primary" style={{ flexShrink: 0 }} onClick={openAdd}>+ Add Product</button>
         </div>
 
         {loading ? <div className="loading">Loading…</div> : (

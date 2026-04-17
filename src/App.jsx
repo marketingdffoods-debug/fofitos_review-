@@ -9,6 +9,8 @@ import Dashboard from './components/admin/Dashboard'
 import ProductsPage from './components/admin/ProductsPage'
 import CategoriesPage from './components/admin/CategoriesPage'
 import ReviewsPage from './components/admin/ReviewsPage'
+import QRPage from './components/admin/QRPage'
+import GoRedirect from './components/GoRedirect'
 
 /* ── Auth guard: blocks /admin/* when not signed in ── */
 function AuthGuard({ children }) {
@@ -40,6 +42,9 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/product/:productId" element={<DetailPage />} />
 
+        {/* ── QR Redirect routes ── */}
+        <Route path="/go/:id" element={<GoRedirect />} />
+
         {/* ── Admin login (public) ── */}
         <Route path="/admin/login" element={<AdminLogin />} />
 
@@ -49,6 +54,7 @@ export default function App() {
           <Route path="products" element={<ProductsPage />} />
           <Route path="categories" element={<CategoriesPage />} />
           <Route path="reviews" element={<ReviewsPage />} />
+          <Route path="qr" element={<QRPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

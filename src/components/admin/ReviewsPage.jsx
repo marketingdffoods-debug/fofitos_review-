@@ -43,9 +43,6 @@ export default function ReviewsPage() {
 
   return (
     <>
-      <div className="topbar">
-        <div className="topbar-title">Reviews</div>
-      </div>
       <div className="admin-content">
         <div className="filter-bar">
           <select className="filter-select" value={filterProd} onChange={e => setFilterProd(e.target.value)}>
