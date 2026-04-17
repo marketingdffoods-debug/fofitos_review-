@@ -104,7 +104,10 @@ function QRCard({ id, label, redirectUrl }) {
       {/* Label */}
       <div style={{ alignSelf: 'stretch', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ fontSize: '1rem', fontWeight: 800, color: '#1A1A2E' }}>{label}</div>
-        <span style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: '#2CB67D', background: 'rgba(44,182,125,0.10)', borderRadius: 50, padding: '3px 10px' }}>Permanent</span>
+        <span style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: '#2CB67D', background: 'rgba(44,182,125,0.10)', borderRadius: 50, padding: '3px 10px', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="#2CB67D" strokeWidth="2.5"/><path d="M7 11V7a5 5 0 0110 0v4" stroke="#2CB67D" strokeWidth="2.5" strokeLinecap="round"/></svg>
+          Permanent
+        </span>
       </div>
 
       {/* QR image */}
@@ -122,15 +125,20 @@ function QRCard({ id, label, redirectUrl }) {
         <div style={{ textAlign: 'center', marginTop: 12, fontWeight: 800, fontSize: '0.68rem', letterSpacing: '2.5px', color: '#7C3AED', textTransform: 'uppercase' }}>FOFiTOS Kitchen</div>
       </div>
 
-      {/* QR Points to */}
+      {/* QR Points to — locked, never changes */}
       <div style={{ width: '100%' }}>
-        <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#9A98A8', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 6 }}>QR Points to (permanent)</div>
-        <div style={{ background: 'rgba(44,182,125,0.06)', border: '1px solid rgba(44,182,125,0.2)', borderRadius: 10, padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-          <span style={{ fontSize: '0.82rem', color: '#16A34A', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>https://www.fofitos.com</span>
-          <button onClick={handleCopyRedirect} style={{ flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', color: '#16A34A', fontSize: '0.68rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 3 }}>
-            {copiedR ? <>✓ Copied!</> : <>📋 Copy</>}
-          </button>
+        <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#9A98A8', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="#9A98A8" strokeWidth="2"/><path d="M7 11V7a5 5 0 0110 0v4" stroke="#9A98A8" strokeWidth="2" strokeLinecap="round"/></svg>
+          QR URL — Permanent &amp; Locked
         </div>
+        <div style={{ background: 'rgba(44,182,125,0.06)', border: '1.5px solid rgba(44,182,125,0.35)', borderRadius: 10, padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, overflow: 'hidden' }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}><rect x="3" y="11" width="18" height="11" rx="2" stroke="#16A34A" strokeWidth="2"/><path d="M7 11V7a5 5 0 0110 0v4" stroke="#16A34A" strokeWidth="2" strokeLinecap="round"/></svg>
+            <span style={{ fontSize: '0.85rem', color: '#16A34A', fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>https://www.fofitos.com</span>
+          </div>
+          <span style={{ flexShrink: 0, fontSize: '0.6rem', fontWeight: 700, color: '#16A34A', background: 'rgba(44,182,125,0.15)', borderRadius: 20, padding: '2px 8px', letterSpacing: '0.5px' }}>FIXED</span>
+        </div>
+        <div style={{ fontSize: '0.62rem', color: '#B0C4B1', marginTop: 5 }}>This QR image will never change — print it once, use it forever.</div>
       </div>
 
       {/* Redirects to */}
@@ -199,7 +207,8 @@ export default function QRPage() {
       <div style={{ marginBottom: 28 }}>
         <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#1A1A2E' }}>QR Codes</div>
         <div style={{ fontSize: '0.8rem', color: '#9A98A8', marginTop: 4 }}>
-          QR image is <strong style={{ color: '#2CB67D' }}>permanent</strong>. Change the destination URL anytime — updates instantly on all devices.
+          The QR image is <strong style={{ color: '#2CB67D' }}>permanently locked to www.fofitos.com</strong> — it will never change no matter what.
+          Optionally set a redirect destination so scans land on a specific page.
         </div>
       </div>
       <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
