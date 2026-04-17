@@ -110,20 +110,6 @@ export default function HomePage() {
   const [modal,       setModal]       = useState(false)
   const [toast,       setToast]       = useState('')
   const [selectedCat, setSelectedCat] = useState(restoreCat)
-  const [redirecting, setRedirecting] = useState(false)
-
-  // Check Supabase for QR redirect destination on every homepage load
-  useEffect(() => {
-    sb.from('qr_links').select('url').eq('id', '1').single()
-      .then(({ data }) => {
-        const dest = data?.url?.trim()
-        if (dest && dest !== '' && dest !== 'https://www.fofitos.com' && dest !== 'http://www.fofitos.com') {
-          setRedirecting(true)
-          window.location.replace(dest)
-        }
-      })
-      .catch(() => {/* no redirect table yet — just show homepage */})
-  }, [])
 
   useEffect(() => {
     Promise.all([
@@ -136,14 +122,6 @@ export default function HomePage() {
       ;(prodData || []).forEach(p => { if (p.img) { const i = new Image(); i.src = p.img } })
     })
   }, [])
-
-  if (redirecting) return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh', flexDirection:'column', gap:12, fontFamily:'Outfit,sans-serif', color:'#7C3AED' }}>
-      <div style={{ width:32, height:32, border:'3px solid #E9D5FF', borderTopColor:'#7C3AED', borderRadius:'50%', animation:'spin 0.8s linear infinite' }}/>
-      <div style={{ fontSize:'0.9rem', fontWeight:600 }}>Redirecting…</div>
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-    </div>
-  )
 
   return (
     <>

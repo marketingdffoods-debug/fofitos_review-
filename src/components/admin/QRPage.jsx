@@ -3,6 +3,11 @@ import QRCodeLib from 'qrcode'
 import fofitosLogo from '../../assets/qr.png'
 import { sb } from '../../lib/supabase'
 
+// Clear the QR redirect cache so next scan picks up the new destination immediately
+function clearQRCache() {
+  localStorage.removeItem('fofitos_qr_dest_v1')
+}
+
 /*
   QR encodes https://www.fofitos.com/go/1 (or /go/2) permanently.
   The destination URL is stored in Supabase and can be changed anytime.
@@ -74,8 +79,12 @@ function QRCard({ id, label, redirectUrl }) {
     setSaving(true)
     const { error } = await sb.from('qr_links').upsert({ id, url: trimmed }, { onConflict: 'id' })
     setSaving(false)
-    if (!error) { setDest(trimmed); setSaved_(true); setTimeout(() => setSaved_(false), 2000) }
-    else alert('Save failed: ' + error.message)
+    if (!error) {
+      setDest(trimmed)
+      clearQRCache() // force fresh lookup on next scan
+      setSaved_(true)
+      setTimeout(() => setSaved_(false), 2000)
+    } else alert('Save failed: ' + error.message)
   }
 
   function handleCopyDest()     { navigator.clipboard.writeText(dest);        setCopied(true);  setTimeout(() => setCopied(false),  2000) }
