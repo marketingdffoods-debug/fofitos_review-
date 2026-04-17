@@ -117,7 +117,7 @@ function QRCard({ id, label, redirectUrl }) {
       <div style={{ width: '100%' }}>
         <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#9A98A8', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 6 }}>QR Points to (permanent)</div>
         <div style={{ background: 'rgba(44,182,125,0.06)', border: '1px solid rgba(44,182,125,0.2)', borderRadius: 10, padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-          <span style={{ fontSize: '0.72rem', color: '#16A34A', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{redirectUrl}</span>
+          <span style={{ fontSize: '0.82rem', color: '#16A34A', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>https://www.fofitos.com</span>
           <button onClick={handleCopyRedirect} style={{ flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', color: '#16A34A', fontSize: '0.68rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 3 }}>
             {copiedR ? <>✓ Copied!</> : <>📋 Copy</>}
           </button>
