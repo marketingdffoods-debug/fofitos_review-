@@ -32,54 +32,114 @@ function avatarColor(name) {
   return colors[h]
 }
 
-function DonutChart({ pro, fat, carb, fibre, cal, revealed = false }) {
-  const C = 2 * Math.PI * 38
-  const tot = (pro||0)+(fat||0)+(carb||0)+(fibre||0) || 1
-  let off = 0
-  function arc(val, color) {
-    const len = (val/tot)*C
-    const d = { dashArray:`${len} ${C-len}`, dashOffset:-off, color }
-    off += len; return d
-  }
-  const arcs = [arc(pro||0,'#2CB67D'),arc(fat||0,'#E09A2C'),arc(carb||0,'#4A90D9'),arc(fibre||0,'#C8BEA8')]
-  const legend = [
-    {l:'Protein',pct:Math.round((pro||0)/tot*100),c:'#2CB67D'},
-    {l:'Fat',    pct:Math.round((fat||0)/tot*100),c:'#E09A2C'},
-    {l:'Carbs',  pct:Math.round((carb||0)/tot*100),c:'#4A90D9'},
-    {l:'Fibre',  pct:Math.round((fibre||0)/tot*100),c:'#C8BEA8'},
+/* ── Apple Watch-style animated activity rings ── */
+function ActivityRings({ pro, fat, carb, fibre, cal, revealed = false }) {
+  const SIZE = 180
+  const C    = SIZE / 2   // 90
+  const SW   = 13         // stroke width
+
+  const total = Math.max((pro||0)+(fat||0)+(carb||0)+(fibre||0), 1)
+
+  // Three concentric rings: outer → inner
+  const rings = [
+    { r:72, color:'#FF2D55', label:'Carbs',   val:carb  || 0 },
+    { r:55, color:'#AAFF00', label:'Protein', val:pro   || 0 },
+    { r:38, color:'#00D8FF', label:'Fat',     val:fat   || 0 },
   ]
+
+  // End-point of arc + rotation angle for the arrow tip
+  function endPt(r, pct) {
+    const a = -Math.PI/2 + pct * 2 * Math.PI
+    return { x: C + r*Math.cos(a), y: C + r*Math.sin(a), rot: pct*360 }
+  }
+
+  const legend = [
+    { l:'Carbs',   pct:Math.round((carb  ||0)/total*100), c:'#FF2D55' },
+    { l:'Protein', pct:Math.round((pro   ||0)/total*100), c:'#AAFF00' },
+    { l:'Fat',     pct:Math.round((fat   ||0)/total*100), c:'#00D8FF' },
+    { l:'Fibre',   pct:Math.round((fibre ||0)/total*100), c:'#C8BEA8' },
+  ]
+
   return (
-    <div style={{display:'flex',alignItems:'center',gap:20}}>
-      <div style={{position:'relative',width:100,height:100,flexShrink:0}}>
-        <svg width="100" height="100" viewBox="0 0 100 100" style={{transform:'rotate(-90deg)'}}>
-          <circle cx="50" cy="50" r="38" fill="none" stroke="#F0EDE6" strokeWidth="11"/>
-          {arcs.map((a,i)=>(
-            <circle key={i} cx="50" cy="50" r="38" fill="none"
-              stroke={a.color} strokeWidth="11"
-              strokeLinecap="round"
-              strokeDashoffset={a.dashOffset}
-              style={{
-                strokeDasharray: revealed ? a.dashArray : `0 ${C}`,
-                transition: revealed
-                  ? `stroke-dasharray 0.75s ${i * 0.12}s cubic-bezier(0.22,1,0.36,1)`
-                  : 'none',
-              }}
-            />
-          ))}
+    <div style={{display:'flex', alignItems:'center', gap:16}}>
+      {/* ── Rings SVG ── */}
+      <div style={{flexShrink:0, borderRadius:'50%', boxShadow:'0 8px 32px rgba(0,0,0,0.38)'}}>
+        <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} style={{display:'block'}}>
+          {/* Deep-dark background */}
+          <circle cx={C} cy={C} r={C} fill="#10081E"/>
+
+          {rings.map((ring, i) => {
+            const pct  = ring.val / total
+            const circ = 2 * Math.PI * ring.r
+            const len  = revealed ? Math.max(pct * circ - SW*0.55, 0) : 0
+            const ep   = endPt(ring.r, pct)
+
+            return (
+              <g key={ring.label}>
+                {/* Dim track */}
+                <circle
+                  cx={C} cy={C} r={ring.r}
+                  fill="none"
+                  stroke={ring.color}
+                  strokeWidth={SW}
+                  strokeOpacity={0.18}
+                />
+                {/* Animated filled arc — starts from 12 o'clock */}
+                <circle
+                  cx={C} cy={C} r={ring.r}
+                  fill="none"
+                  stroke={ring.color}
+                  strokeWidth={SW}
+                  strokeLinecap="round"
+                  transform={`rotate(-90 ${C} ${C})`}
+                  style={{
+                    strokeDasharray: `${len} ${circ}`,
+                    transition: revealed
+                      ? `stroke-dasharray 1.0s ${i*0.22}s cubic-bezier(0.22,1,0.36,1)`
+                      : 'none',
+                    filter: revealed ? `drop-shadow(0 0 5px ${ring.color}90)` : 'none',
+                  }}
+                />
+                {/* Arrow chevron at the tip of each ring */}
+                {revealed && pct > 0.04 && (
+                  <g
+                    transform={`translate(${ep.x},${ep.y}) rotate(${ep.rot})`}
+                    style={{opacity:0, animation:`fadeIn 0.22s ${i*0.22+1.05}s ease forwards`}}
+                  >
+                    <path
+                      d="M-5.5,-4 L0.5,0 L-5.5,4"
+                      fill="none"
+                      stroke={ring.color}
+                      strokeWidth="2.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </g>
+                )}
+              </g>
+            )
+          })}
+
+          {/* Center: calorie value */}
+          <text x={C} y={C-4} textAnchor="middle"
+            fill="#fff" fontSize="21" fontWeight="800" fontFamily="Outfit,sans-serif"
+          >{cal}</text>
+          <text x={C} y={C+14} textAnchor="middle"
+            fill="rgba(255,255,255,0.35)" fontSize="9" letterSpacing="2.5"
+            fontFamily="Outfit,sans-serif"
+          >KCAL</text>
         </svg>
-        <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',textAlign:'center'}}>
-          <div style={{fontSize:'1.1rem',fontWeight:700,color:'#1a1a2e'}}>{cal}</div>
-          <div style={{fontSize:'0.52rem',textTransform:'uppercase',letterSpacing:'1px',color:'#aaa'}}>kcal</div>
-        </div>
       </div>
-      <div style={{flex:1,display:'flex',flexDirection:'column',gap:8}}>
-        {legend.map(m=>(
-          <div key={m.l} style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-            <span style={{display:'flex',alignItems:'center',gap:7,fontSize:'0.78rem',color:'#555'}}>
-              <span style={{width:8,height:8,borderRadius:'50%',background:m.c,display:'inline-block',flexShrink:0}}/>
+
+      {/* Legend */}
+      <div style={{flex:1, display:'flex', flexDirection:'column', gap:10}}>
+        {legend.map(m => (
+          <div key={m.l} style={{display:'flex', alignItems:'center', justifyContent:'space-between'}}>
+            <span style={{display:'flex', alignItems:'center', gap:7, fontSize:'0.78rem', color:'#555'}}>
+              <span style={{width:8, height:8, borderRadius:'50%', background:m.c, display:'inline-block', flexShrink:0}}/>
               {m.l}
             </span>
-            <span style={{fontSize:'0.78rem',fontWeight:700,color:'#1a1a2e'}}>{m.pct}%</span>
+            <span style={{fontSize:'0.78rem', fontWeight:700, color:'#1a1a2e'}}>{m.pct}%</span>
           </div>
         ))}
       </div>
@@ -331,6 +391,7 @@ export default function DetailPage() {
           0%, 100% { filter: drop-shadow(0 0 4px currentColor); transform: scale(1); }
           50%       { filter: drop-shadow(0 0 12px currentColor); transform: scale(1.08); }
         }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
       `}</style>
 
       {/* ── Back button ── */}
@@ -504,7 +565,7 @@ export default function DetailPage() {
         {/* ══ CALORIE BREAKDOWN ══ */}
         <div style={{margin:'12px 16px 0',background:'#fff',borderRadius:16,padding:'16px 18px',boxShadow:'0 1px 6px rgba(0,0,0,0.05)',animation:contentAnim('fadeUp',0.34)}}>
           <div style={{fontSize:'0.68rem',fontWeight:700,letterSpacing:'1.5px',textTransform:'uppercase',color:'#aaa',marginBottom:14}}>Calorie Breakdown</div>
-          <DonutChart pro={p.pro} fat={p.fat} carb={p.carb} fibre={p.fibre} cal={p.cal} revealed={chartIn}/>
+          <ActivityRings pro={p.pro} fat={p.fat} carb={p.carb} fibre={p.fibre} cal={p.cal} revealed={chartIn}/>
         </div>
 
         {/* ══ NUTRITION FACTS ══ */}
@@ -711,7 +772,7 @@ export default function DetailPage() {
               {/* Calorie Breakdown */}
               <div style={{ background:'#fff', borderRadius:16, padding:'20px 22px', boxShadow:'0 1px 8px rgba(76,29,149,0.07)' }}>
                 <div style={{ fontSize:'0.63rem', fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', color:'#C4B5FD', marginBottom:16 }}>Calorie Breakdown</div>
-                <DonutChart pro={p.pro} fat={p.fat} carb={p.carb} fibre={p.fibre} cal={p.cal} revealed={chartIn}/>
+                <ActivityRings pro={p.pro} fat={p.fat} carb={p.carb} fibre={p.fibre} cal={p.cal} revealed={chartIn}/>
               </div>
 
               {/* Nutrition Facts */}
