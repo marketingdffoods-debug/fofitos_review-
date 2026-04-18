@@ -145,34 +145,34 @@ export default function HomePage() {
       }}>
         {/* ── Header ── */}
         <div className="home-header-wrap">
-          {/* White card with text */}
-          <div className="home-header-card">
-            {/* Left: logo + tagline */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, zIndex: 2 }}>
-              <img src={logoImg} alt="FOFiTOS" style={{ height: 52, objectFit: 'contain', objectPosition: 'left', display: 'block' }} />
-              <div style={{ fontSize: '0.6rem', fontWeight: 500, color: '#aaa' }}>
-                Product of Doctor Farmer Foods
-              </div>
+
+          {/* Left: text content */}
+          <div style={{ padding: '0 0 0 22px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 5, flex: 1, zIndex: 2 }}>
+            <img src={logoImg} alt="FOFiTOS" style={{ height: 54, objectFit: 'contain', objectPosition: 'left', display: 'block' }} />
+            <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '2px', color: '#7C3AED', textTransform: 'uppercase' }}>
+              Tasty - Healthy - Everyday
             </div>
-            {/* Spacer so mascot doesn't overlap text */}
-            <div style={{ width: 160, flexShrink: 0 }} />
+            <div style={{ fontSize: '0.6rem', fontWeight: 400, color: '#aaa' }}>
+              Product of Doctor Farmer Foods
+            </div>
           </div>
 
-          {/* Mascot — absolutely positioned, floats above the card on the right */}
-          <img
-            src={manLogo}
-            alt="mascot"
-            style={{
-              position: 'absolute',
-              right: 0,
-              bottom: 0,
-              height: 190,
-              width: 'auto',
-              objectFit: 'contain',
-              display: 'block',
-              pointerEvents: 'none',
-            }}
-          />
+          {/* Right: mascot — inside card, scaled to fill height */}
+          <div style={{ height: '100%', width: 180, flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+            <img
+              src={manLogo}
+              alt="mascot"
+              style={{
+                height: '100%',
+                width: 'auto',
+                objectFit: 'contain',
+                display: 'block',
+                transform: 'scale(1.6)',
+                transformOrigin: 'center center',
+              }}
+            />
+          </div>
+
         </div>
 
         {/* ── Category Grid ── */}

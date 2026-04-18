@@ -106,31 +106,28 @@ body {
   gap: 16px;
 }
 
-/* ── Home header outer wrapper ── */
+/* ── Home header wrapper ── */
 .home-header-wrap {
   margin: 16px 16px 0;
-  position: relative;
-}
-
-/* ── White card inside header ── */
-.home-header-card {
   background: #ffffff;
   border-radius: 22px;
   border: 1px solid rgba(0,0,0,0.06);
   box-shadow: 0 2px 16px rgba(91,33,182,0.07);
-  padding: 20px 22px 22px;
-  min-height: 100px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  overflow: visible;
+  overflow: hidden;
+  height: 150px;
+  position: relative;
 }
+.home-header-card { display: contents; }
 
 /* ── Desktop: side padding + max-width for home page ── */
 @media (min-width: 900px) {
   .home-header-wrap {
     max-width: 960px;
     margin: 24px auto 0;
+    height: 170px;
   }
   .home-cats {
     max-width: 1200px;
