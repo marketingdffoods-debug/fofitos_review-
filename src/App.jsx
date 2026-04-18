@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { sb } from './lib/supabase'
 import HomePage from './components/customer/HomePage'
+import CategoryPage from './components/customer/CategoryPage'
 import DetailPage from './components/customer/DetailPage'
 import AdminLayout from './components/admin/AdminLayout'
 import AdminLogin from './components/admin/AdminLogin'
@@ -40,6 +41,7 @@ export default function App() {
       <Routes>
         {/* ── Customer routes ── */}
         <Route path="/" element={<HomePage />} />
+        <Route path="/category/:catId" element={<CategoryPage />} />
         <Route path="/product/:productId" element={<DetailPage />} />
 
         {/* ── QR Redirect routes ── */}

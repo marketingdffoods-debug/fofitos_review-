@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { sb } from '../../lib/supabase'
 import ImageUpload from './ImageUpload'
 
-const EMPTY_CAT = { id: '', name: '', description: '', img: '', sort_order: 0 }
+const EMPTY_CAT = { id: '', name: '', description: '', img: '', video_url: '', sort_order: 0 }
 
 /* ── Product drag-and-drop reorder modal ── */
 function ProductOrderModal({ cat, onClose, onSaved }) {
@@ -154,9 +154,9 @@ export default function CategoriesPage() {
     if (!form.id || !form.name) return
     setSaving(true)
     if (editing) {
-      await sb.from('categories').update({ name: form.name, description: form.description, img: form.img, sort_order: form.sort_order }).eq('id', form.id)
+      await sb.from('categories').update({ name: form.name, description: form.description, img: form.img, video_url: form.video_url || null, sort_order: form.sort_order }).eq('id', form.id)
     } else {
-      await sb.from('categories').insert({ id: form.id, name: form.name, description: form.description, img: form.img, sort_order: form.sort_order })
+      await sb.from('categories').insert({ id: form.id, name: form.name, description: form.description, img: form.img, video_url: form.video_url || null, sort_order: form.sort_order })
     }
     setSaving(false)
     setModal(false)
@@ -249,6 +249,15 @@ export default function CategoriesPage() {
                 <div className="form-group full">
                   <label className="f-label">Category Image</label>
                   <ImageUpload value={form.img} onChange={v => set('img', v)} />
+                </div>
+                <div className="form-group full">
+                  <label className="f-label">Video URL <span style={{ fontWeight: 400, color: 'var(--muted)' }}>(optional — YouTube or direct MP4)</span></label>
+                  <input
+                    className="f-input"
+                    value={form.video_url || ''}
+                    onChange={e => set('video_url', e.target.value)}
+                    placeholder="https://www.youtube.com/watch?v=... or https://..."
+                  />
                 </div>
               </div>
             </div>

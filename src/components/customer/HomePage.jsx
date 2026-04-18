@@ -1,17 +1,14 @@
 import { useState, useEffect, useRef } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { sb } from '../../lib/supabase'
-import ReviewModal from './ReviewModal'
-import Toast from './Toast'
-import InlineCarousel from './InlineCarousel'
+import Footer from './Footer'
 import logoImg from '../../assets/logo.png'
 import manLogo from '../../assets/man-logo.png'
 
-/* ── Single card with Tap → Lift → Expand ── */
+/* ── Single category card ── */
 function CatCard({ c, index, onExpand }) {
-  const [phase, setPhase] = useState('idle') // idle → pressing → lifted → idle
+  const [phase, setPhase] = useState('idle')
   const pressTimer = useRef(null)
-  const cardRef = useRef(null)
 
   function startPress() {
     setPhase('pressing')
@@ -22,18 +19,11 @@ function CatCard({ c, index, onExpand }) {
     clearTimeout(pressTimer.current)
     if (phase === 'pressing' || phase === 'lifted') {
       setPhase('lifted')
-      // small delay so lift animation is visible before expand
-      setTimeout(() => {
-        setPhase('idle')
-        onExpand(c)
-      }, 160)
+      setTimeout(() => { setPhase('idle'); onExpand(c) }, 160)
     }
   }
 
-  function cancelPress() {
-    clearTimeout(pressTimer.current)
-    setPhase('idle')
-  }
+  function cancelPress() { clearTimeout(pressTimer.current); setPhase('idle') }
 
   const transform =
     phase === 'pressing' ? 'scale(0.96)'
@@ -47,7 +37,6 @@ function CatCard({ c, index, onExpand }) {
 
   return (
     <div
-      ref={cardRef}
       className="cat-card-new"
       style={{
         animationDelay: `${index * 0.06}s`,
@@ -61,11 +50,9 @@ function CatCard({ c, index, onExpand }) {
         WebkitTapHighlightColor: 'transparent',
         willChange: 'transform',
       }}
-      /* Touch */
       onTouchStart={startPress}
       onTouchEnd={endPress}
       onTouchCancel={cancelPress}
-      /* Mouse */
       onMouseDown={startPress}
       onMouseUp={endPress}
       onMouseLeave={cancelPress}
@@ -98,30 +85,24 @@ function CatCard({ c, index, onExpand }) {
   )
 }
 
+/* ═══════════════════════════════════════════ */
 export default function HomePage() {
-  const loc             = useLocation()
-  const restoreCat      = loc.state?.restoreCat       || null
-  const carouselProducts = loc.state?.carouselProducts || []
-  const restoreProductId = loc.state?.restoreProductId || null
+  const nav = useNavigate()
 
-  const [cats,        setCats]        = useState([])
-  const [products,    setProducts]    = useState([])
-  const [loading,     setLoading]     = useState(true)
-  const [modal,       setModal]       = useState(false)
-  const [toast,       setToast]       = useState('')
-  const [selectedCat, setSelectedCat] = useState(restoreCat)
+  const [cats,    setCats]    = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    Promise.all([
-      sb.from('categories').select('*').order('sort_order'),
-      sb.from('products').select('id, name, cat, img'),
-    ]).then(([{ data: catData }, { data: prodData }]) => {
-      setCats(catData || [])
-      setProducts(prodData || [])
-      setLoading(false)
-      ;(prodData || []).forEach(p => { if (p.img) { const i = new Image(); i.src = p.img } })
-    })
+    sb.from('categories').select('*').order('sort_order')
+      .then(({ data }) => {
+        setCats(data || [])
+        setLoading(false)
+      })
   }, [])
+
+  function openCategory(cat) {
+    nav(`/category/${cat.id}`, { state: { cat } })
+  }
 
   return (
     <>
@@ -133,11 +114,7 @@ export default function HomePage() {
         }
       `}</style>
 
-      {/* ── Page content ── */}
       <div style={{
-        filter: selectedCat ? 'blur(5px)' : 'none',
-        transition: 'filter 0.3s ease',
-        pointerEvents: selectedCat ? 'none' : 'auto',
         minHeight: '100vh',
         background: '#EDEAF8',
         position: 'relative',
@@ -145,8 +122,6 @@ export default function HomePage() {
       }}>
         {/* ── Header ── */}
         <div className="home-header-wrap">
-
-          {/* Left: logo + company text — vertically centred */}
           <div style={{
             position: 'absolute', left: 24, top: 0, bottom: 0,
             display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8,
@@ -158,22 +133,16 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Right: mascot fills full card height top-to-bottom */}
           <div style={{
             position: 'absolute', right: 0, top: 0, bottom: 0,
             width: 240,
             display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
           }}>
-            <img
-              src={manLogo}
-              alt="mascot"
-              style={{ height: '100%', width: 'auto', objectFit: 'contain', display: 'block' }}
-            />
+            <img src={manLogo} alt="mascot" style={{ height: '100%', width: 'auto', objectFit: 'contain', display: 'block' }} />
           </div>
-
         </div>
 
-        {/* ── Category Grid ── */}
+        {/* ── Category grid ── */}
         <div className="home-cats">
           <div className="cats-label">Browse Categories</div>
           {loading ? (
@@ -185,64 +154,15 @@ export default function HomePage() {
                   key={c.id}
                   c={c}
                   index={i}
-                  onExpand={setSelectedCat}
+                  onExpand={openCategory}
                 />
               ))}
             </div>
           )}
         </div>
+
+        <Footer />
       </div>
-
-      {/* ── Expanded overlay ── */}
-      {selectedCat && (
-        <>
-          <div
-            onClick={() => setSelectedCat(null)}
-            style={{
-              position: 'fixed', inset: 0,
-              background: 'rgba(0,0,0,0.52)',
-              zIndex: 100,
-              animation: restoreCat ? 'none' : 'fdIn 0.25s ease',
-            }}
-          />
-          <button
-            onClick={() => setSelectedCat(null)}
-            style={{
-              position: 'fixed', top: 18, right: 18,
-              width: 36, height: 36, borderRadius: '50%',
-              border: '1.5px solid rgba(255,255,255,0.35)',
-              background: 'rgba(255,255,255,0.12)',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', fontSize: '0.82rem', color: '#fff',
-              zIndex: 102,
-              boxShadow: '0 2px 12px rgba(0,0,0,0.18)',
-            }}
-          >✕</button>
-
-          {(() => {
-            const isRestore = !!restoreCat && restoreCat.id === selectedCat.id
-            return (
-              <InlineCarousel
-                cat={selectedCat}
-                skipAnimation={isRestore}
-                initialProducts={isRestore ? carouselProducts : []}
-                initialProductId={isRestore ? restoreProductId : null}
-              />
-            )
-          })()}
-        </>
-      )}
-
-      {modal && (
-        <ReviewModal
-          products={products}
-          onClose={() => setModal(false)}
-          onPosted={() => setToast('✦ Review posted!')}
-        />
-      )}
-      {toast && <Toast msg={toast} onDone={() => setToast('')} />}
     </>
   )
 }
