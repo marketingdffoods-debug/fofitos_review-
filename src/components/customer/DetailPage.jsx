@@ -220,44 +220,20 @@ export default function DetailPage() {
   const [loading,     setLoading]     = useState(!initialProd)
   const [modal,       setModal]       = useState(false)
   const [toast,       setToast]       = useState('')
-  const [leaving,        setLeaving]        = useState(false)
   const [macrosRevealed, setMacrosRevealed] = useState(false)
   const [chartIn,        setChartIn]        = useState(false)
   const [imgLoaded,      setImgLoaded]      = useState(!!fromCarousel) // skip fade when from carousel (already preloaded)
 
-  /* ── swipe-down-to-go-back ── */
   const scrollRef   = useRef(null)
-  const touchStartY = useRef(null)
   const leavingRef  = useRef(false)
 
-  useEffect(() => {
-    const el = scrollRef.current
-    if (!el) return
-
-    const onStart = e => {
-      touchStartY.current = el.scrollTop === 0 ? e.touches[0].clientY : null
-    }
-    const onMove = e => {
-      if (touchStartY.current === null || leavingRef.current) return
-      const dy = e.touches[0].clientY - touchStartY.current
-      if (dy > 55) {
-        if (e.cancelable) e.preventDefault()
-        leavingRef.current = true
-        setLeaving(true)
-        touchStartY.current = null
-        setTimeout(() => nav('/', { state: { restoreCat: savedCat, carouselProducts: savedProducts, restoreProductId: p.id } }), 500)
-      }
-    }
-
-    el.addEventListener('touchstart', onStart, { passive: true })
-    el.addEventListener('touchmove',  onMove,  { passive: false })
-    return () => {
-      el.removeEventListener('touchstart', onStart)
-      el.removeEventListener('touchmove',  onMove)
-    }
-  }, [savedCat, nav])
-
   /* ── 5-second macro reveal ── */
+  /* ── scroll to top whenever the product changes ── */
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = 0
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [productId])
+
   useEffect(() => {
     const t = setTimeout(() => setMacrosRevealed(true), 3000)
     return () => clearTimeout(t)
@@ -335,18 +311,6 @@ export default function DetailPage() {
           from { opacity:0; transform:translateY(12px); }
           to   { opacity:1; transform:translateY(0); }
         }
-        @keyframes burgerDown {
-          from { transform: translateX(-50%) translateY(0); }
-          to   { transform: translateX(-50%) translateY(calc(100vh - 431px)); }
-        }
-        @keyframes cardDown {
-          from { transform: translateY(0); }
-          to   { transform: translateY(calc(100vh - 443px)); }
-        }
-        @keyframes bgToOverlay {
-          0%   { background: #F2EFF8; }
-          100% { background: rgba(0,0,0,0.52); }
-        }
         .dp-scroll::-webkit-scrollbar { display:none; }
         .dp-mobile-layout { display:block; }
         .dp-desktop-layout { display:none; }
@@ -371,13 +335,7 @@ export default function DetailPage() {
 
       {/* ── Back button ── */}
       <button
-        onClick={() => {
-          if (leavingRef.current) return
-          leavingRef.current = true
-          setLeaving(true)
-          const isDesktop = window.innerWidth >= 900
-          setTimeout(() => nav('/', { state: { restoreCat: savedCat, carouselProducts: savedProducts, restoreProductId: product?.id } }), isDesktop ? 0 : 520)
-        }}
+        onClick={() => nav(-1)}
         style={{
           position: 'fixed', top: 16, left: 16, zIndex: 999,
           width: 40, height: 40, borderRadius: '50%',
@@ -397,7 +355,7 @@ export default function DetailPage() {
         ref={scrollRef}
         className="dp-scroll dp-mobile-layout"
         style={{
-          overflowY: leaving ? 'hidden' : 'auto',
+          overflowY: 'auto',
           height:'100dvh',
           background:'#F2EFF8',
           paddingBottom: 40,
@@ -636,7 +594,7 @@ export default function DetailPage() {
               {savedProducts.filter(x => String(x.id) !== String(productId)).map(prod => (
                 <div
                   key={prod.id}
-                  onClick={() => nav(`/product/${prod.id}`, { state: { product: prod, cat: savedCat, products: savedProducts } })}
+                  onClick={() => { window.scrollTo({ top: 0, behavior: 'instant' }); nav(`/product/${prod.id}`, { state: { product: prod, cat: savedCat, products: savedProducts } }) }}
                   style={{
                     flexShrink:0, width:110, background:'#fff', borderRadius:14,
                     overflow:'hidden', border:'1px solid #EDE8F8', cursor:'pointer',
@@ -825,7 +783,7 @@ export default function DetailPage() {
                     {savedProducts.filter(x => String(x.id) !== String(productId)).map(prod => (
                       <div
                         key={prod.id}
-                        onClick={() => nav(`/product/${prod.id}`, { state: { product: prod, cat: savedCat, products: savedProducts } })}
+                        onClick={() => { window.scrollTo({ top: 0, behavior: 'instant' }); nav(`/product/${prod.id}`, { state: { product: prod, cat: savedCat, products: savedProducts } }) }}
                         style={{
                           flexShrink:0, width:120, background:'#F8F5FF', borderRadius:12,
                           overflow:'hidden', border:'1px solid #EDE8F8', cursor:'pointer',
@@ -860,78 +818,6 @@ export default function DetailPage() {
         </div>
       </div>
 
-      {/* ══ SWIPE-DOWN EXIT OVERLAY — reverse transition back to carousel (mobile only) ══ */}
-      {leaving && p && window.innerWidth < 900 && (
-        <>
-          {/* Two-layer cover: solid instant hide + animated dark fade */}
-          {/* Layer 1: immediately opaque — hides page content on first render frame */}
-          <div style={{
-            position:'fixed', inset:0, zIndex:198, pointerEvents:'none',
-            background:'#F2EFF8',
-          }}/>
-          {/* Layer 2: fades to dark overlay after burger starts moving */}
-          <div style={{
-            position:'fixed', inset:0, zIndex:200, pointerEvents:'none',
-            animation:'bgToOverlay 0.4s 0.18s ease forwards',
-          }}/>
-
-          {/* Burger slides back down to carousel position */}
-          <div style={{
-            position:'fixed', top:80, left:'50%',
-            zIndex:215, pointerEvents:'none',
-            animation:'burgerDown 0.45s 0.06s cubic-bezier(0.4,0,1,1) both',
-            willChange: 'transform',
-          }}>
-            <img src={p.img} alt={p.name} style={{
-              width:185, height:185, objectFit:'contain', display:'block',
-              filter:'drop-shadow(0 16px 36px rgba(0,0,0,0.35))',
-            }}/>
-          </div>
-
-          {/* Purple card slides back down */}
-          <div style={{
-            position:'fixed', top:185, left:16, right:16,
-            zIndex:213, pointerEvents:'none',
-            animation:'cardDown 0.45s 0.06s cubic-bezier(0.4,0,1,1) both',
-            background:'linear-gradient(135deg,#5B21B6 0%,#7C3AED 100%)',
-            borderRadius:22, padding:'90px 20px 24px', overflow:'hidden',
-            willChange: 'transform',
-          }}>
-            <div style={{position:'absolute',top:-30,right:-20,width:130,height:130,borderRadius:'50%',background:'rgba(167,139,250,0.25)',filter:'blur(35px)',pointerEvents:'none'}}/>
-            <div style={{position:'absolute',bottom:-20,left:-10,width:100,height:100,borderRadius:'50%',background:'rgba(91,33,182,0.35)',filter:'blur(25px)',pointerEvents:'none'}}/>
-            <div style={{position:'relative',zIndex:2}}>
-              <div style={{fontSize:'clamp(1.25rem,5vw,1.6rem)',fontWeight:800,color:'#fff',lineHeight:1.3,marginBottom:6}}>
-                {(() => {
-                  const words = (p.name || '').split(' ')
-                  const last  = words.pop()
-                  return (
-                    <>
-                      {words.length > 0 && words.join(' ') + ' '}
-                      <span style={{ whiteSpace: 'nowrap' }}>
-                        {last}
-                        <span style={{display:'inline-flex',alignItems:'center',marginLeft:7,verticalAlign:'middle',position:'relative',top:'-1px'}}>
-                          <VegBadge isVeg={p.is_veg !== false} />
-                        </span>
-                      </span>
-                    </>
-                  )
-                })()}
-              </div>
-              {p.tagline&&<div style={{fontSize:'0.75rem',color:'rgba(255,255,255,0.7)',lineHeight:1.45,marginBottom:12}}>{p.tagline}</div>}
-              <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:14}}>
-                <span style={{color:'#FBBF24',fontSize:'0.82rem',letterSpacing:1}}>{starStr(p.rating||0)}</span>
-                <span style={{fontWeight:700,color:'#fff',fontSize:'0.8rem'}}>{p.rating}</span>
-                <span style={{color:'rgba(255,255,255,0.55)',fontSize:'0.73rem'}}>({p.reviews} reviews)</span>
-              </div>
-              <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
-                {(p.tags||[]).map(t=>(
-                  <span key={t} style={{fontSize:'0.62rem',fontWeight:800,letterSpacing:'1px',textTransform:'uppercase',color:'rgba(255,255,255,0.95)',border:'1.5px solid rgba(255,255,255,0.5)',borderRadius:50,padding:'4px 12px',background:'rgba(255,255,255,0.1)'}}>{t}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </>
-      )}
 
       {modal&&<ReviewModal products={allProducts} preSelectedId={p.id} onClose={()=>setModal(false)} onPosted={()=>{setToast('✦ Review posted!');fetchReviews()}}/>}
       {toast&&<Toast msg={toast} onDone={()=>setToast('')}/>}

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { sb } from '../../lib/supabase'
-import InlineCarousel from './InlineCarousel'
 import Footer from './Footer'
 import logoImg from '../../assets/logo.png'
 import manLogo from '../../assets/man-logo.png'
@@ -112,7 +111,6 @@ export default function CategoryPage() {
   const [cat,      setCat]      = useState(loc.state?.cat || null)
   const [products, setProducts] = useState([])
   const [loading,  setLoading]  = useState(true)
-  const [selProd,  setSelProd]  = useState(null)   // product whose carousel is open
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -144,6 +142,10 @@ export default function CategoryPage() {
         @keyframes catFdIn {
           from { opacity: 0; }
           to   { opacity: 1; }
+        }
+        @keyframes pageSlideUp {
+          from { transform: translateY(100vh); }
+          to   { transform: translateY(0); }
         }
 
         /* ── Video wrapper ── */
@@ -185,14 +187,12 @@ export default function CategoryPage() {
         }
       `}</style>
 
-      {/* ── PAGE (blurs behind carousel) ── */}
+      {/* ── PAGE ── */}
       <div style={{
-        filter: selProd ? 'blur(4px)' : 'none',
-        transition: 'filter 0.3s ease',
-        pointerEvents: selProd ? 'none' : 'auto',
         minHeight: '100vh',
         background: '#EDEAF8',
-        animation: 'catFdIn 0.25s ease both',
+        animation: 'pageSlideUp 0.42s cubic-bezier(0.22,1,0.36,1) both',
+        willChange: 'transform',
       }}>
 
         {/* ── Header ── */}
@@ -288,7 +288,7 @@ export default function CategoryPage() {
                   key={p.id}
                   p={p}
                   index={i}
-                  onClick={() => setSelProd(p)}
+                  onClick={() => nav(`/product/${p.id}`, { state: { product: p, cat, products } })}
                 />
               ))}
             </div>
@@ -298,46 +298,6 @@ export default function CategoryPage() {
         <Footer />
       </div>
 
-      {/* ── Carousel overlay ── */}
-      {selProd && (
-        <>
-          {/* Dark scrim */}
-          <div
-            onClick={() => setSelProd(null)}
-            style={{
-              position: 'fixed', inset: 0,
-              background: 'rgba(0,0,0,0.48)',
-              zIndex: 100,
-              animation: 'catFdIn 0.22s ease',
-            }}
-          />
-
-          {/* ✕ close */}
-          <button
-            onClick={() => setSelProd(null)}
-            style={{
-              position: 'fixed', top: 18, right: 18,
-              width: 36, height: 36, borderRadius: '50%',
-              border: '1.5px solid rgba(255,255,255,0.35)',
-              background: 'rgba(255,255,255,0.13)',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', fontSize: '0.82rem', color: '#fff',
-              zIndex: 102,
-              boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
-            }}
-          >✕</button>
-
-          {/* Carousel — key forces remount so each product click restarts animation + index */}
-          <InlineCarousel
-            key={selProd.id}
-            cat={cat}
-            initialProducts={products}
-            initialProductId={selProd.id}
-          />
-        </>
-      )}
     </>
   )
 }

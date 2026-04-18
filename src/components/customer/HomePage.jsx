@@ -5,7 +5,11 @@ import Footer from './Footer'
 import logoImg from '../../assets/logo.png'
 import manLogo from '../../assets/man-logo.png'
 
-/* ── Single category card ── */
+/* ── Floating image constants (same as CategoryPage) ── */
+const IMG = 130
+const OVF = IMG / 2
+
+/* ── Single category card — floating image + glassy card ── */
 function CatCard({ c, index, onExpand }) {
   const [phase, setPhase] = useState('idle')
   const pressTimer = useRef(null)
@@ -14,7 +18,6 @@ function CatCard({ c, index, onExpand }) {
     setPhase('pressing')
     pressTimer.current = setTimeout(() => setPhase('lifted'), 80)
   }
-
   function endPress() {
     clearTimeout(pressTimer.current)
     if (phase === 'pressing' || phase === 'lifted') {
@@ -22,32 +25,30 @@ function CatCard({ c, index, onExpand }) {
       setTimeout(() => { setPhase('idle'); onExpand(c) }, 160)
     }
   }
-
   function cancelPress() { clearTimeout(pressTimer.current); setPhase('idle') }
 
-  const transform =
-    phase === 'pressing' ? 'scale(0.96)'
-    : phase === 'lifted'  ? 'scale(1.06) translateY(-8px)'
-    : 'scale(1) translateY(0)'
-
-  const shadow =
-    phase === 'pressing' ? '0 2px 8px rgba(0,0,0,0.08)'
-    : phase === 'lifted'  ? '0 20px 48px rgba(91,33,182,0.22), 0 8px 20px rgba(0,0,0,0.12)'
-    : '0 2px 12px rgba(0,0,0,0.06)'
+  const scale =
+    phase === 'pressing' ? 'scale(0.95)'
+    : phase === 'lifted'  ? 'scale(1.05) translateY(-6px)'
+    : 'scale(1)'
 
   return (
+    /* Entry animation wrapper — only handles fade-in, never re-animates */
+    <div style={{
+      animation: `catFadeIn 0.4s cubic-bezier(.22,1,.36,1) ${index * 0.06}s both`,
+    }}>
+    {/* Press/lift interaction wrapper */}
     <div
-      className="cat-card-new"
       style={{
-        animationDelay: `${index * 0.06}s`,
-        transform,
-        boxShadow: shadow,
-        transition: phase === 'idle'
-          ? 'transform 0.3s cubic-bezier(.4,0,.2,1), box-shadow 0.3s ease'
-          : 'transform 0.14s cubic-bezier(.4,0,.2,1), box-shadow 0.14s ease',
+        position: 'relative',
+        paddingTop: OVF,
         cursor: 'pointer',
         userSelect: 'none',
         WebkitTapHighlightColor: 'transparent',
+        transform: scale,
+        transition: phase === 'idle'
+          ? 'transform 0.3s cubic-bezier(.4,0,.2,1)'
+          : 'transform 0.14s cubic-bezier(.4,0,.2,1)',
         willChange: 'transform',
       }}
       onTouchStart={startPress}
@@ -57,30 +58,71 @@ function CatCard({ c, index, onExpand }) {
       onMouseUp={endPress}
       onMouseLeave={cancelPress}
     >
-      {/* Lifted glow ring */}
-      {phase === 'lifted' && (
-        <div style={{
-          position: 'absolute', inset: -3,
-          borderRadius: 20,
-          border: '2px solid rgba(124,58,237,0.35)',
-          boxShadow: '0 0 0 4px rgba(124,58,237,0.10)',
+      {/* Floating category image */}
+      <img
+        src={c.img}
+        alt={c.name}
+        draggable={false}
+        style={{
+          position: 'absolute',
+          top: 0, left: '50%',
+          transform: 'translateX(-50%)',
+          width: IMG, height: IMG,
+          objectFit: 'contain',
+          display: 'block',
+          zIndex: 2,
           pointerEvents: 'none',
-          zIndex: 10,
-          animation: 'ringPulse 0.2s ease',
-        }}/>
-      )}
+          filter: 'drop-shadow(0 8px 20px rgba(0,0,0,0.18))',
+        }}
+      />
 
-      <div className="cat-card-img-wrap">
-        <img className="cat-card-img" src={c.img} alt={c.name} />
-      </div>
-      <div className="cat-card-body">
-        <div className="cat-card-name-row">
-          <span className="cat-card-name">{c.name}</span>
+      {/* Glassy card */}
+      <div style={{
+        background: 'rgba(255,255,255,0.45)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderRadius: 18,
+        paddingTop: OVF + 8,
+        paddingBottom: 14,
+        paddingLeft: 8,
+        paddingRight: 8,
+        textAlign: 'center',
+        boxShadow: phase === 'lifted'
+          ? '0 20px 48px rgba(91,33,182,0.22), inset 0 1px 0 rgba(255,255,255,0.8)'
+          : '0 4px 20px rgba(91,33,182,0.09), inset 0 1px 0 rgba(255,255,255,0.8)',
+        border: phase === 'lifted'
+          ? '1.5px solid rgba(124,58,237,0.35)'
+          : '1px solid rgba(255,255,255,0.65)',
+        position: 'relative',
+        zIndex: 1,
+        minHeight: OVF + 60,
+        transition: 'box-shadow 0.2s, border 0.2s',
+      }}>
+        <div style={{
+          fontSize: '0.85rem', fontWeight: 700,
+          color: '#3D2C7A', lineHeight: 1.3,
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+          padding: '0 4px',
+        }}>
+          {c.name}
         </div>
         {c.description && (
-          <div className="cat-card-desc">{c.description}</div>
+          <div style={{
+            fontSize: '0.63rem', color: '#9187B5',
+            marginTop: 4, lineHeight: 1.4,
+            display: '-webkit-box',
+            WebkitLineClamp: 1,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}>
+            {c.description}
+          </div>
         )}
       </div>
+    </div>
     </div>
   )
 }
@@ -108,9 +150,9 @@ export default function HomePage() {
     <>
       <style>{`
         @keyframes fdIn    { from { opacity:0 } to { opacity:1 } }
-        @keyframes ringPulse {
-          from { opacity:0; transform:scale(0.9) }
-          to   { opacity:1; transform:scale(1) }
+        @keyframes catFadeIn {
+          from { opacity:0; transform:translateY(18px); }
+          to   { opacity:1; transform:translateY(0); }
         }
       `}</style>
 
@@ -143,12 +185,12 @@ export default function HomePage() {
         </div>
 
         {/* ── Category grid ── */}
-        <div className="home-cats">
+        <div className="home-cats" style={{ paddingTop: OVF + 16 }}>
           <div className="cats-label">Browse Categories</div>
           {loading ? (
             <div className="loading">Loading menu…</div>
           ) : (
-            <div className="cat-grid-new">
+            <div className="cat-grid-new" style={{ alignItems: 'start' }}>
               {cats.map((c, i) => (
                 <CatCard
                   key={c.id}
