@@ -108,21 +108,26 @@ body {
 
 /* ── Home header wrapper ── */
 .home-header-wrap {
-  padding: 24px 20px 0;
-  background: transparent;
+  margin: 16px 16px 0;
+  background: #ffffff;
+  border-radius: 22px;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 2px 16px rgba(91,33,182,0.07);
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   overflow: hidden;
-  min-height: 120px;
+  padding: 20px 0 0 22px;
+  min-height: 110px;
+  position: relative;
 }
 
 /* ── Desktop: side padding + max-width for home page ── */
 @media (min-width: 900px) {
   .home-header-wrap {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 32px 120px 0;
+    max-width: 960px;
+    margin: 24px auto 0;
+    padding: 24px 0 0 36px;
   }
   .home-cats {
     max-width: 1200px;

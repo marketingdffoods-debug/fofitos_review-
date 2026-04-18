@@ -145,16 +145,22 @@ export default function HomePage() {
       }}>
         {/* ── Header ── */}
         <div className="home-header-wrap">
-          <div style={{ paddingBottom: 10, zIndex: 2 }}>
-            <img src={logoImg} alt="FOFiTOS" style={{ height: 60, objectFit: 'contain', display: 'block' }} />
-            <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '3px', color: '#7C3AED', textTransform: 'uppercase', marginTop: 4 }}>
-              Tasty · Healthy · Everyday
+          {/* Left: logo + taglines */}
+          <div style={{ paddingBottom: 22, zIndex: 2, flex: 1 }}>
+            <img src={logoImg} alt="FOFiTOS" style={{ height: 52, objectFit: 'contain', display: 'block' }} />
+            <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '2.5px', color: '#7C3AED', textTransform: 'uppercase', marginTop: 6 }}>
+              Tasty &nbsp;-&nbsp; Healthy &nbsp;-&nbsp; Everyday
             </div>
-            <div style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '1.5px', color: '#333', textTransform: 'uppercase', marginTop: 5 }}>
+            <div style={{ fontSize: '0.62rem', fontWeight: 500, color: '#999', marginTop: 5 }}>
               Product of Doctor Farmer Foods
             </div>
           </div>
-          <img src={manLogo} alt="mascot" style={{ height: 160, objectFit: 'contain', display: 'block', flexShrink: 0 }} />
+          {/* Right: mascot — slightly overflows top for effect */}
+          <img
+            src={manLogo}
+            alt="mascot"
+            style={{ height: 140, objectFit: 'contain', display: 'block', flexShrink: 0, alignSelf: 'flex-end', marginBottom: 0 }}
+          />
         </div>
 
         {/* ── Category Grid ── */}
