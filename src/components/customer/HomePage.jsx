@@ -155,11 +155,19 @@ export default function HomePage() {
               Product of Doctor Farmer Foods
             </div>
           </div>
-          {/* Right: mascot fills full card height */}
+          {/* Right: mascot — overflows top so it looks big and bold */}
           <img
             src={manLogo}
             alt="mascot"
-            style={{ height: '100%', width: 'auto', objectFit: 'contain', display: 'block', flexShrink: 0 }}
+            style={{
+              height: '130%',
+              width: 'auto',
+              objectFit: 'contain',
+              display: 'block',
+              flexShrink: 0,
+              marginTop: '-15%',
+              marginRight: 0,
+            }}
           />
         </div>
 
