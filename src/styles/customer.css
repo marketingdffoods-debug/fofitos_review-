@@ -113,11 +113,8 @@ body {
   border-radius: 22px;
   border: 1px solid rgba(0,0,0,0.06);
   box-shadow: 0 2px 16px rgba(91,33,182,0.07);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   overflow: hidden;
-  height: 130px;
+  height: 155px;
   position: relative;
 }
 .home-header-card { display: contents; }
@@ -127,7 +124,7 @@ body {
   .home-header-wrap {
     max-width: 960px;
     margin: 24px auto 0;
-    height: 170px;
+    height: 175px;
   }
   .home-cats {
     max-width: 1200px;

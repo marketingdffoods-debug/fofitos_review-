@@ -146,27 +146,30 @@ export default function HomePage() {
         {/* ── Header ── */}
         <div className="home-header-wrap">
 
-          {/* Left: logo image (already has tagline built in) + company line */}
-          <div style={{ padding: '0 0 0 22px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 6, zIndex: 2 }}>
-            <img src={logoImg} alt="FOFiTOS" style={{ height: 70, objectFit: 'contain', objectPosition: 'left', display: 'block' }} />
-            <div style={{ fontSize: '0.6rem', fontWeight: 400, color: '#aaa' }}>
+          {/* Left: logo + company text — vertically centred */}
+          <div style={{
+            position: 'absolute', left: 24, top: 0, bottom: 0,
+            display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8,
+            zIndex: 2,
+          }}>
+            <img src={logoImg} alt="FOFiTOS" style={{ height: 80, objectFit: 'contain', objectPosition: 'left', display: 'block' }} />
+            <div style={{ fontSize: '0.68rem', fontWeight: 500, color: '#aaa', letterSpacing: '0.3px' }}>
               Product of Doctor Farmer Foods
             </div>
           </div>
 
-          {/* Right: mascot — full figure, no over-scaling */}
-          <img
-            src={manLogo}
-            alt="mascot"
-            style={{
-              height: '115%',
-              width: 'auto',
-              objectFit: 'contain',
-              display: 'block',
-              flexShrink: 0,
-              alignSelf: 'flex-end',
-            }}
-          />
+          {/* Right: mascot fills full card height top-to-bottom */}
+          <div style={{
+            position: 'absolute', right: 0, top: 0, bottom: 0,
+            width: 240,
+            display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
+          }}>
+            <img
+              src={manLogo}
+              alt="mascot"
+              style={{ height: '100%', width: 'auto', objectFit: 'contain', display: 'block' }}
+            />
+          </div>
 
         </div>
 
