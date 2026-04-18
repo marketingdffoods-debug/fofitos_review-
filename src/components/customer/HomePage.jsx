@@ -146,32 +146,27 @@ export default function HomePage() {
         {/* ── Header ── */}
         <div className="home-header-wrap">
 
-          {/* Left: text content */}
-          <div style={{ padding: '0 0 0 22px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 5, flex: 1, zIndex: 2 }}>
-            <img src={logoImg} alt="FOFiTOS" style={{ height: 54, objectFit: 'contain', objectPosition: 'left', display: 'block' }} />
-            <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '2px', color: '#7C3AED', textTransform: 'uppercase' }}>
-              Tasty - Healthy - Everyday
-            </div>
+          {/* Left: logo image (already has tagline built in) + company line */}
+          <div style={{ padding: '0 0 0 22px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 6, zIndex: 2 }}>
+            <img src={logoImg} alt="FOFiTOS" style={{ height: 70, objectFit: 'contain', objectPosition: 'left', display: 'block' }} />
             <div style={{ fontSize: '0.6rem', fontWeight: 400, color: '#aaa' }}>
               Product of Doctor Farmer Foods
             </div>
           </div>
 
-          {/* Right: mascot — inside card, scaled to fill height */}
-          <div style={{ height: '100%', width: 180, flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-            <img
-              src={manLogo}
-              alt="mascot"
-              style={{
-                height: '100%',
-                width: 'auto',
-                objectFit: 'contain',
-                display: 'block',
-                transform: 'scale(1.6)',
-                transformOrigin: 'center center',
-              }}
-            />
-          </div>
+          {/* Right: mascot — full figure, no over-scaling */}
+          <img
+            src={manLogo}
+            alt="mascot"
+            style={{
+              height: '115%',
+              width: 'auto',
+              objectFit: 'contain',
+              display: 'block',
+              flexShrink: 0,
+              alignSelf: 'flex-end',
+            }}
+          />
 
         </div>
 

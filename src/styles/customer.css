@@ -117,7 +117,7 @@ body {
   align-items: center;
   justify-content: space-between;
   overflow: hidden;
-  height: 150px;
+  height: 130px;
   position: relative;
 }
 .home-header-card { display: contents; }
