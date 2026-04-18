@@ -34,17 +34,17 @@ function avatarColor(name) {
 
 /* ── Apple Watch-style animated activity rings ── */
 function ActivityRings({ pro, fat, carb, fibre, cal, revealed = false }) {
-  const SIZE = 148
-  const C    = SIZE / 2   // 74
-  const SW   = 11         // stroke width
+  const SIZE = 130
+  const C    = SIZE / 2   // 65
+  const SW   = 10         // stroke width
 
   const total = Math.max((pro||0)+(fat||0)+(carb||0)+(fibre||0), 1)
 
   // Three concentric rings: outer → inner
   const rings = [
-    { r:59, color:'#FF2D55', label:'Carbs',   val:carb  || 0 },
-    { r:45, color:'#AAFF00', label:'Protein', val:pro   || 0 },
-    { r:31, color:'#00D8FF', label:'Fat',     val:fat   || 0 },
+    { r:52, color:'#FF2D55', label:'Carbs',   val:carb  || 0 },
+    { r:39, color:'#AAFF00', label:'Protein', val:pro   || 0 },
+    { r:26, color:'#00D8FF', label:'Fat',     val:fat   || 0 },
   ]
 
   // End-point of arc + rotation angle for the arrow tip
@@ -64,7 +64,10 @@ function ActivityRings({ pro, fat, carb, fibre, cal, revealed = false }) {
     <div style={{display:'flex', alignItems:'center', gap:16}}>
       {/* ── Rings SVG ── */}
       <div style={{flexShrink:0}}>
-        <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} style={{display:'block'}}>
+        <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`}
+          style={{display:'block', overflow:'hidden'}}
+          overflow="hidden"
+        >
           {/* White background */}
           <circle cx={C} cy={C} r={C} fill="#ffffff"/>
 
@@ -97,7 +100,7 @@ function ActivityRings({ pro, fat, carb, fibre, cal, revealed = false }) {
                     transition: revealed
                       ? `stroke-dasharray 1.0s ${i*0.22}s cubic-bezier(0.22,1,0.36,1)`
                       : 'none',
-                    filter: revealed ? `drop-shadow(0 0 5px ${ring.color}90)` : 'none',
+                    filter: revealed ? `drop-shadow(0 0 3px ${ring.color}80)` : 'none',
                   }}
                 />
                 {/* Arrow chevron at the tip of each ring */}
@@ -121,11 +124,11 @@ function ActivityRings({ pro, fat, carb, fibre, cal, revealed = false }) {
           })}
 
           {/* Center: calorie value */}
-          <text x={C} y={C-3} textAnchor="middle"
-            fill="#1a1a2e" fontSize="18" fontWeight="800" fontFamily="Outfit,sans-serif"
+          <text x={C} y={C-2} textAnchor="middle"
+            fill="#1a1a2e" fontSize="16" fontWeight="800" fontFamily="Outfit,sans-serif"
           >{cal}</text>
-          <text x={C} y={C+13} textAnchor="middle"
-            fill="#bbb" fontSize="8" letterSpacing="2.5"
+          <text x={C} y={C+11} textAnchor="middle"
+            fill="#bbb" fontSize="8" letterSpacing="2"
             fontFamily="Outfit,sans-serif"
           >KCAL</text>
         </svg>
