@@ -148,9 +148,6 @@ export default function HomePage() {
           {/* Left: logo + taglines — vertically centered */}
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingLeft: 22, zIndex: 2, flex: 1, alignSelf: 'stretch' }}>
             <img src={logoImg} alt="FOFiTOS" style={{ height: 50, objectFit: 'contain', objectPosition: 'left', display: 'block' }} />
-            <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '2.5px', color: '#7C3AED', textTransform: 'uppercase', marginTop: 6 }}>
-              Tasty &nbsp;-&nbsp; Healthy &nbsp;-&nbsp; Everyday
-            </div>
             <div style={{ fontSize: '0.6rem', fontWeight: 500, color: '#aaa', marginTop: 4 }}>
               Product of Doctor Farmer Foods
             </div>
