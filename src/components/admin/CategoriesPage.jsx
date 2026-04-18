@@ -251,12 +251,12 @@ export default function CategoriesPage() {
                   <ImageUpload value={form.img} onChange={v => set('img', v)} />
                 </div>
                 <div className="form-group full">
-                  <label className="f-label">Video URL <span style={{ fontWeight: 400, color: 'var(--muted)' }}>(optional — YouTube or direct MP4)</span></label>
+                  <label className="f-label">Video URL <span style={{ fontWeight: 400, color: 'var(--muted)' }}>(optional — Google Drive share link)</span></label>
                   <input
                     className="f-input"
                     value={form.video_url || ''}
                     onChange={e => set('video_url', e.target.value)}
-                    placeholder="https://www.youtube.com/watch?v=... or https://..."
+                    placeholder="https://drive.google.com/file/d/FILE_ID/view?usp=sharing"
                   />
                 </div>
               </div>

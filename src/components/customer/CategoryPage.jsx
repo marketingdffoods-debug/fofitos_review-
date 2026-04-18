@@ -5,23 +5,24 @@ import Footer from './Footer'
 import logoImg from '../../assets/logo.png'
 import manLogo from '../../assets/man-logo.png'
 
-/* Convert any YouTube watch URL → embed URL */
-function ytEmbed(url) {
+/* Convert a Google Drive share/view URL → embed (preview) URL */
+function driveEmbed(url) {
   try {
     const u = new URL(url)
-    if (u.hostname.includes('youtube.com')) {
-      const v = u.searchParams.get('v')
-      return v ? `https://www.youtube.com/embed/${v}?rel=0` : url
-    }
-    if (u.hostname.includes('youtu.be')) {
-      return `https://www.youtube.com/embed${u.pathname}?rel=0`
+    if (u.hostname.includes('drive.google.com')) {
+      // /file/d/FILE_ID/view  or  /file/d/FILE_ID/edit
+      const m = u.pathname.match(/\/file\/d\/([^/]+)/)
+      if (m) return `https://drive.google.com/file/d/${m[1]}/preview`
+      // ?id=FILE_ID format
+      const id = u.searchParams.get('id')
+      if (id) return `https://drive.google.com/file/d/${id}/preview`
     }
   } catch {}
   return url
 }
 
-function isYouTube(url) {
-  return url && (url.includes('youtube.com') || url.includes('youtu.be'))
+function isDrive(url) {
+  return url && url.includes('drive.google.com')
 }
 
 /* ── Single product card — image floats half above card, half inside ── */
@@ -238,11 +239,11 @@ export default function CategoryPage() {
         {/* ── Video section — right below header ── */}
         {cat?.video_url && (
           <div className="cat-video-wrap">
-            {isYouTube(cat.video_url) ? (
+            {isDrive(cat.video_url) ? (
               <iframe
-                src={ytEmbed(cat.video_url)}
+                src={driveEmbed(cat.video_url)}
                 style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allow="autoplay"
                 allowFullScreen
                 title={cat.name}
               />

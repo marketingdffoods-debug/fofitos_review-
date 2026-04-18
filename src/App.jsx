@@ -9,7 +9,7 @@ import AdminLogin from './components/admin/AdminLogin'
 import Dashboard from './components/admin/Dashboard'
 import ProductsPage from './components/admin/ProductsPage'
 import CategoriesPage from './components/admin/CategoriesPage'
-import ReviewsPage from './components/admin/ReviewsPage'
+import LinksPage from './components/admin/LinksPage'
 import QRPage from './components/admin/QRPage'
 import GoRedirect from './components/GoRedirect'
 
@@ -55,7 +55,7 @@ export default function App() {
           <Route index element={<Dashboard />} />
           <Route path="products" element={<ProductsPage />} />
           <Route path="categories" element={<CategoriesPage />} />
-          <Route path="reviews" element={<ReviewsPage />} />
+          <Route path="links" element={<LinksPage />} />
           <Route path="qr" element={<QRPage />} />
         </Route>
       </Routes>

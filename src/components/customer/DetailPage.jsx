@@ -280,6 +280,7 @@ export default function DetailPage() {
   const [product,     setProduct]     = useState(initialProd)
   const [allProducts, setAllProducts] = useState([])
   const [reviews,     setReviews]     = useState([])
+  const [links,       setLinks]       = useState({ zomato_url:'', swiggy_url:'', review_url:'' })
   const [loading,     setLoading]     = useState(!initialProd)
   const [modal,       setModal]       = useState(false)
   const [toast,       setToast]       = useState('')
@@ -321,9 +322,11 @@ export default function DetailPage() {
     Promise.all([
       sb.from('products').select('*').eq('id', productId).single(),
       sb.from('products').select('id, name'),
-    ]).then(([{data:prod},{data:allProds}]) => {
+      sb.from('links').select('*').eq('id', 'default').maybeSingle(),
+    ]).then(([{data:prod},{data:allProds},{data:lnk}]) => {
       setProduct(prod)
       setAllProducts(allProds||[])
+      if (lnk) setLinks({ zomato_url: lnk.zomato_url||'', swiggy_url: lnk.swiggy_url||'', review_url: lnk.review_url||'' })
       setLoading(false)
     })
     fetchReviews()
@@ -475,11 +478,6 @@ export default function DetailPage() {
                 })()}
               </div>
               {p.tagline && <div style={{fontSize:'0.75rem',color:'rgba(255,255,255,0.7)',lineHeight:1.45,marginBottom:12}}>{p.tagline}</div>}
-              <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:14}}>
-                <span style={{color:'#FBBF24',fontSize:'0.82rem',letterSpacing:1}}>{starStr(p.rating||0)}</span>
-                <span style={{fontWeight:700,color:'#fff',fontSize:'0.8rem'}}>{p.rating}</span>
-                <span style={{color:'rgba(255,255,255,0.55)',fontSize:'0.73rem'}}>({p.reviews} reviews)</span>
-              </div>
               <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
                 {(p.tags||[]).map(t=>(
                   <span key={t} style={{fontSize:'0.62rem',fontWeight:800,letterSpacing:'1px',textTransform:'uppercase',color:'rgba(255,255,255,0.95)',border:'1.5px solid rgba(255,255,255,0.5)',borderRadius:50,padding:'4px 12px',background:'rgba(255,255,255,0.1)'}}>{t}</span>
@@ -491,75 +489,91 @@ export default function DetailPage() {
 
         {/* ══ ORDER BUTTONS + REVIEW — single row ══ */}
         <div style={{display:'flex',gap:10,padding:'14px 16px 0',animation:contentAnim('fadeUp',0.2)}}>
-          {/* Zomato — logo only */}
-          <button style={{width:52,height:46,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',background:'#fff',border:'1.5px solid #FFDAD8',borderRadius:50,padding:'8px',cursor:'pointer',boxShadow:'0 2px 12px rgba(226,36,26,0.1)'}}>
-            <img src={zomatoImg} alt="Zomato" style={{height:24,objectFit:'contain'}}/>
-          </button>
-          {/* Swiggy — logo only */}
-          <button style={{width:52,height:46,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',background:'#fff',border:'1.5px solid #FFE0C8',borderRadius:50,padding:'8px',cursor:'pointer',boxShadow:'0 2px 12px rgba(252,128,25,0.1)'}}>
-            <img src={swiggyImg} alt="Swiggy" style={{height:24,objectFit:'contain'}}/>
-          </button>
-          {/* Write a Review — fills remaining space */}
-          <button onClick={()=>setModal(true)} style={{flex:1,height:46,display:'flex',alignItems:'center',justifyContent:'center',background:'#7B2CBF',color:'#fff',border:'none',borderRadius:50,fontSize:'0.82rem',fontWeight:700,cursor:'pointer',boxShadow:'0 4px 18px rgba(123,44,191,0.32)'}}>
-            Write a Review
-          </button>
+          {/* Zomato */}
+          <a href={links.zomato_url||undefined} target="_blank" rel="noreferrer"
+            style={{flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:links.zomato_url?'auto':'none',opacity:links.zomato_url?1:0.4}}>
+            <img src={zomatoImg} alt="Zomato" style={{height:40,objectFit:'contain',display:'block'}}/>
+          </a>
+          {/* Swiggy */}
+          <a href={links.swiggy_url||undefined} target="_blank" rel="noreferrer"
+            style={{flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:links.swiggy_url?'auto':'none',opacity:links.swiggy_url?1:0.4}}>
+            <img src={swiggyImg} alt="Swiggy" style={{height:40,objectFit:'contain',display:'block'}}/>
+          </a>
+          {/* Write a Review */}
+          {links.review_url ? (
+            <a href={links.review_url} target="_blank" rel="noreferrer"
+              style={{flex:1,height:46,display:'flex',alignItems:'center',justifyContent:'center',background:'#7B2CBF',color:'#fff',borderRadius:16,fontSize:'0.82rem',fontWeight:700,textDecoration:'none',boxShadow:'0 4px 18px rgba(123,44,191,0.32)'}}>
+              Write a Review
+            </a>
+          ) : (
+            <button onClick={()=>setModal(true)} style={{flex:1,height:46,display:'flex',alignItems:'center',justifyContent:'center',background:'#7B2CBF',color:'#fff',border:'none',borderRadius:16,fontSize:'0.82rem',fontWeight:700,cursor:'pointer',boxShadow:'0 4px 18px rgba(123,44,191,0.32)'}}>
+              Write a Review
+            </button>
+          )}
         </div>
 
         {/* ══ MACRO ROW ══ */}
         <div style={{display:'flex',gap:8,padding:'14px 16px 0',animation:contentAnim('fadeUp',0.28)}}>
           {[
             {val:p.cal,  unit:'kcal', label:'CALORIES', line:'#F59E0B', accent:'#FFF7E6', color:'#F59E0B', icon:<FlameIcon    color="#F59E0B"/>, delay:0},
-            {val:p.pro,  unit:'g',    label:'PROTEIN',  line:'#2CB67D', accent:'#EDFAF4', color:'#2CB67D', icon:<DumbbellIcon color="#2CB67D"/>, delay:90},
-            {val:p.carb, unit:'g',    label:'CARBS',    line:'#4A90D9', accent:'#EEF4FF', color:'#4A90D9', icon:<WheatIcon    color="#4A90D9"/>, delay:180},
+            {val:p.pro,  unit:'g',    label:'PROTEIN',  line:'#2CB67D', accent:'#EDFAF4', color:'#2CB67D', icon:<DumbbellIcon color="#2CB67D"/>, delay:120},
+            {val:p.carb, unit:'g',    label:'CARBS',    line:'#4A90D9', accent:'#EEF4FF', color:'#4A90D9', icon:<WheatIcon    color="#4A90D9"/>, delay:240},
           ].map(m=>(
-            <div key={m.label} style={{
-              flex:1, position:'relative', overflow:'hidden',
-              background:'#fff', borderRadius:14,
-              boxShadow:'0 1px 6px rgba(0,0,0,0.05)',
-            }}>
-              {/* ── Actual value (underneath cover) ── */}
-              <div style={{padding:'14px 8px 10px',textAlign:'center'}}>
-                <div>
-                  <span style={{fontSize:'1.4rem',fontWeight:700,color:'#1a1a2e'}}>{m.val??'—'}</span>
-                  <span style={{fontSize:'0.68rem',color:'#bbb',marginLeft:2}}>{m.unit}</span>
-                </div>
-                <div style={{fontSize:'0.58rem',fontWeight:700,letterSpacing:'1px',color:'#bbb',marginTop:3}}>{m.label}</div>
-                <div style={{height:3,borderRadius:2,background:m.line,marginTop:8}}/>
-              </div>
-
-              {/* ── Cover — icon + shine, slides up after 5 s ── */}
+            /* ── Flip card container ── */
+            <div key={m.label} style={{ flex:1, height:86, perspective:'600px' }}>
+              {/* Flipper — rotates on reveal */}
               <div style={{
-                position:'absolute', inset:0,
-                background: m.accent,
-                borderRadius:14,
-                display:'flex', flexDirection:'column',
-                alignItems:'center', justifyContent:'center',
-                gap:5, overflow:'hidden',
-                transform: macrosRevealed ? 'translateY(-110%)' : 'translateY(0)',
+                position:'relative', width:'100%', height:'100%',
+                transformStyle:'preserve-3d',
                 transition: macrosRevealed
-                  ? `transform 0.65s ${m.delay}ms cubic-bezier(0.22,1,0.36,1)`
+                  ? `transform 0.65s ${m.delay}ms cubic-bezier(0.4,0,0.2,1)`
                   : 'none',
-                pointerEvents: macrosRevealed ? 'none' : 'auto',
+                transform: macrosRevealed ? 'rotateY(180deg)' : 'rotateY(0deg)',
               }}>
-                {/* Shine sweep */}
+
+                {/* ── FRONT: icon face ── */}
                 <div style={{
-                  position:'absolute', top:0, left:0,
-                  width:'55%', height:'100%',
-                  background:'linear-gradient(105deg,transparent 35%,rgba(255,255,255,0.75) 50%,transparent 65%)',
-                  animation:'macroShine 2.4s ease-in-out infinite',
-                  pointerEvents:'none',
-                }}/>
-                {/* Icon */}
-                <div>
-                  {m.icon}
-                </div>
-                {/* Label */}
-                <div style={{
-                  fontSize:'0.5rem', fontWeight:800, letterSpacing:'1.5px',
-                  color: m.color, textTransform:'uppercase',
+                  position:'absolute', inset:0,
+                  backfaceVisibility:'hidden', WebkitBackfaceVisibility:'hidden',
+                  background: m.accent, borderRadius:14,
+                  boxShadow:'0 1px 6px rgba(0,0,0,0.05)',
+                  display:'flex', flexDirection:'column',
+                  alignItems:'center', justifyContent:'center',
+                  gap:5, overflow:'hidden',
                 }}>
-                  {m.label}
+                  {/* Shine sweep */}
+                  <div style={{
+                    position:'absolute', top:0, left:0,
+                    width:'55%', height:'100%',
+                    background:'linear-gradient(105deg,transparent 35%,rgba(255,255,255,0.75) 50%,transparent 65%)',
+                    animation:'macroShine 2.4s ease-in-out infinite',
+                    pointerEvents:'none',
+                  }}/>
+                  {m.icon}
+                  <div style={{fontSize:'0.5rem',fontWeight:800,letterSpacing:'1.5px',color:m.color,textTransform:'uppercase'}}>
+                    {m.label}
+                  </div>
                 </div>
+
+                {/* ── BACK: value face ── */}
+                <div style={{
+                  position:'absolute', inset:0,
+                  backfaceVisibility:'hidden', WebkitBackfaceVisibility:'hidden',
+                  transform:'rotateY(180deg)',
+                  background:'#fff', borderRadius:14,
+                  boxShadow:'0 1px 6px rgba(0,0,0,0.05)',
+                  display:'flex', flexDirection:'column',
+                  alignItems:'center', justifyContent:'center',
+                  padding:'10px 8px 0', textAlign:'center',
+                }}>
+                  <div>
+                    <span style={{fontSize:'1.4rem',fontWeight:700,color:'#1a1a2e'}}>{m.val??'—'}</span>
+                    <span style={{fontSize:'0.68rem',color:'#bbb',marginLeft:2}}>{m.unit}</span>
+                  </div>
+                  <div style={{fontSize:'0.58rem',fontWeight:700,letterSpacing:'1px',color:'#bbb',marginTop:3,marginBottom:'auto'}}>{m.label}</div>
+                  <div style={{height:3,borderRadius:'2px 2px 0 0',background:m.line,width:'100%',marginTop:8}}/>
+                </div>
+
               </div>
             </div>
           ))}
@@ -711,11 +725,6 @@ export default function DetailPage() {
                   <div style={{ fontSize:'0.58rem', fontWeight:700, letterSpacing:'2.5px', textTransform:'uppercase', color:'rgba(196,181,253,0.7)', marginBottom:6 }}>FOFITOS KITCHEN</div>
                   <div style={{ fontSize:'clamp(1.25rem,2vw,1.6rem)', fontWeight:800, color:'#fff', lineHeight:1.2, marginBottom:5 }}>{p.name}</div>
                   {p.tagline && <div style={{ fontSize:'0.76rem', color:'rgba(196,181,253,0.8)', lineHeight:1.4, marginBottom:12 }}>{p.tagline}</div>}
-                  <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:14 }}>
-                    <span style={{ color:'#FBBF24', fontSize:'0.85rem', letterSpacing:1 }}>{starStr(p.rating||0)}</span>
-                    <span style={{ fontWeight:700, color:'#fff', fontSize:'0.82rem' }}>{p.rating}</span>
-                    <span style={{ color:'rgba(255,255,255,0.45)', fontSize:'0.73rem' }}>({p.reviews})</span>
-                  </div>
                   <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
                     {(p.tags||[]).map(t => (
                       <span key={t} style={{ fontSize:'0.6rem', fontWeight:700, letterSpacing:'0.5px', color:'rgba(255,255,255,0.9)', border:'1.5px solid rgba(255,255,255,0.3)', borderRadius:50, padding:'3px 11px', background:'rgba(255,255,255,0.1)' }}>{t}</span>
@@ -743,15 +752,24 @@ export default function DetailPage() {
 
               {/* Buttons — below stats */}
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12 }}>
-                <button style={{ height:50, background:'#fff', border:'1.5px solid #FFDAD8', borderRadius:12, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 2px 10px rgba(226,36,26,0.1)' }}>
-                  <img src={zomatoImg} alt="Zomato" style={{ height:26, objectFit:'contain' }}/>
-                </button>
-                <button style={{ height:50, background:'#fff', border:'1.5px solid #FFE0C8', borderRadius:12, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 2px 10px rgba(252,128,25,0.1)' }}>
-                  <img src={swiggyImg} alt="Swiggy" style={{ height:26, objectFit:'contain' }}/>
-                </button>
-                <button onClick={() => setModal(true)} style={{ height:50, background:'#fff', color:'#4C1D95', border:'2px solid #DDD6FE', borderRadius:12, fontSize:'0.82rem', fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
-                  <span style={{ color:'#FBBF24' }}>★</span> Write a Review
-                </button>
+                <a href={links.zomato_url||undefined} target="_blank" rel="noreferrer"
+                  style={{ display:'flex', alignItems:'center', justifyContent:'center', pointerEvents:links.zomato_url?'auto':'none', opacity:links.zomato_url?1:0.4 }}>
+                  <img src={zomatoImg} alt="Zomato" style={{ height:44, objectFit:'contain', display:'block' }}/>
+                </a>
+                <a href={links.swiggy_url||undefined} target="_blank" rel="noreferrer"
+                  style={{ display:'flex', alignItems:'center', justifyContent:'center', pointerEvents:links.swiggy_url?'auto':'none', opacity:links.swiggy_url?1:0.4 }}>
+                  <img src={swiggyImg} alt="Swiggy" style={{ height:44, objectFit:'contain', display:'block' }}/>
+                </a>
+                {links.review_url ? (
+                  <a href={links.review_url} target="_blank" rel="noreferrer"
+                    style={{ height:50, background:'#fff', color:'#4C1D95', border:'2px solid #DDD6FE', borderRadius:12, fontSize:'0.82rem', fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center', gap:6, textDecoration:'none' }}>
+                    <span style={{ color:'#FBBF24' }}>★</span> Write a Review
+                  </a>
+                ) : (
+                  <button onClick={() => setModal(true)} style={{ height:50, background:'#fff', color:'#4C1D95', border:'2px solid #DDD6FE', borderRadius:12, fontSize:'0.82rem', fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
+                    <span style={{ color:'#FBBF24' }}>★</span> Write a Review
+                  </button>
+                )}
               </div>
 
               {/* Fofitos Promise — purple theme */}
