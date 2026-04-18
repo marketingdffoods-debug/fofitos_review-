@@ -681,6 +681,9 @@ export default function DetailPage() {
           <div style={{marginTop:16,fontSize:'0.58rem',color:'#ccc',textAlign:'center',letterSpacing:'0.3px'}}>
             © {new Date().getFullYear()} Doctor Farmer Foods Pvt. Ltd. All rights reserved.
           </div>
+          <div style={{marginTop:6,fontSize:'0.55rem',color:'#bbb',textAlign:'center',letterSpacing:'0.3px',lineHeight:1.8}}>
+            FSSAI Lic. No. 12426023000520 &nbsp;|&nbsp; GST 33AAMCD2507N1ZJ
+          </div>
         </div>
       </div>
 
@@ -896,6 +899,9 @@ export default function DetailPage() {
             </div>
             <div style={{width:'100%',paddingTop:14,borderTop:'1px solid rgba(0,0,0,0.06)',fontSize:'0.58rem',color:'#ccc',textAlign:'center'}}>
               © {new Date().getFullYear()} Doctor Farmer Foods Pvt. Ltd. All rights reserved.
+            </div>
+            <div style={{fontSize:'0.55rem',color:'#bbb',textAlign:'center',letterSpacing:'0.3px',marginTop:5}}>
+              FSSAI Lic. No. 12426023000520 &nbsp;|&nbsp; GST 33AAMCD2507N1ZJ
             </div>
           </div>
         </div>

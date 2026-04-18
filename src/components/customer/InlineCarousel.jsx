@@ -44,6 +44,7 @@ export default function InlineCarousel({ cat, skipAnimation = false, initialProd
   const [containerW,  setContainerW]  = useState(window.innerWidth)
   const [hintVisible, setHintVisible] = useState(false)
   const [bouncing,    setBouncing]    = useState(false)
+  const [bounceKey,   setBounceKey]   = useState(0)
   const [entryDone,   setEntryDone]   = useState(skipAnimation)
 
   const dragging     = useRef(false)
@@ -78,6 +79,7 @@ export default function InlineCarousel({ cat, skipAnimation = false, initialProd
     // After 2 s of inactivity: show hint + bounce the panel twice
     hintTimer.current = setTimeout(() => {
       setHintVisible(true)
+      setBounceKey(k => k + 1)
       setBouncing(true)
       bounceTimer.current = setTimeout(() => setBouncing(false), 1500)
     }, 2000)
@@ -170,6 +172,7 @@ export default function InlineCarousel({ cat, skipAnimation = false, initialProd
     clearTimeout(bounceTimer.current)
     hintTimer.current = setTimeout(() => {
       setHintVisible(true)
+      setBounceKey(k => k + 1)
       setBouncing(true)
       bounceTimer.current = setTimeout(() => setBouncing(false), 1500)
     }, 2000)
@@ -274,7 +277,7 @@ export default function InlineCarousel({ cat, skipAnimation = false, initialProd
       {/* ── OUTER positioning shell (never animated) ── */}
       <div className="carousel-outer">
 
-      {/* ── INNER animated + event wrapper ── */}
+      {/* ── INNER: event handler + size wrapper (never remounted) ── */}
       <div
         ref={wrapRef}
         className="carousel-inner"
@@ -282,12 +285,6 @@ export default function InlineCarousel({ cat, skipAnimation = false, initialProd
           height: CARD_H + OVERFLOW,
           opacity: exiting ? 0 : 1,
           transition: exiting ? 'opacity 0.08s' : 'none',
-          animation: exiting        ? 'none'
-                   : bouncing       ? 'panelBounce 1.4s cubic-bezier(0.22,1,0.36,1)'
-                   : entryDone      ? 'none'
-                   : skipAnimation  ? 'none'
-                   : 'sheetUp 0.42s cubic-bezier(0.22,1,0.36,1) both',
-          willChange: 'transform',
         }}
         onTouchStart={e => dragStart(e.touches[0].clientX, e.touches[0].clientY)}
         onTouchEnd={dragEnd}
@@ -295,6 +292,19 @@ export default function InlineCarousel({ cat, skipAnimation = false, initialProd
         onMouseMove={e => { if (dragging.current) handleMove(e.clientX, e.clientY) }}
         onMouseUp={dragEnd}
         onMouseLeave={dragEnd}
+      >
+      {/* ── ANIMATED wrapper — remounts on each bounce via key, restarting the CSS animation ── */}
+      <div
+        key={bouncing ? bounceKey : 'base'}
+        style={{
+          position: 'absolute', inset: 0,
+          animation: exiting       ? 'none'
+                   : bouncing      ? 'panelBounce 1.4s cubic-bezier(0.22,1,0.36,1)'
+                   : entryDone     ? 'none'
+                   : skipAnimation ? 'none'
+                   : 'sheetUp 0.42s cubic-bezier(0.22,1,0.36,1) both',
+          willChange: 'transform',
+        }}
       >
         {/* ── PURPLE CARD — full rounded corners, sits at bottom ── */}
         <div style={{
@@ -396,7 +406,8 @@ export default function InlineCarousel({ cat, skipAnimation = false, initialProd
             </div>
           )}
         </div>
-      </div>
+      </div>{/* ── /animated wrapper ── */}
+      </div>{/* ── /carousel-inner ── */}
       </div>{/* ── /carousel-outer ── */}
 
       {/* ══ TRANSITION OVERLAY — shared-element transition to detail page ══ */}
