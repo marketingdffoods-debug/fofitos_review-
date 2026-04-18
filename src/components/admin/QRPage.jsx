@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import QRCodeLib from 'qrcode'
 import fofitosLogo from '../../assets/qr.png'
+import { sb } from '../../lib/supabase'
 
 const URL = 'https://www.fofitos.com'
 const SIZE = 480
@@ -43,8 +44,43 @@ function useSharedQR() {
   return qrUrl
 }
 
-function QRCard({ num, qrUrl, onDownload }) {
+function QRCard({ num, qrUrl }) {
+  const id = String(num)
   const [downloading, setDownloading] = useState(false)
+  const [dest,    setDest]    = useState('')
+  const [input,   setInput]   = useState('')
+  const [loading, setLoading] = useState(true)
+  const [saving,  setSaving]  = useState(false)
+  const [saved,   setSaved]   = useState(false)
+  const [copied,  setCopied]  = useState(false)
+
+  useEffect(() => {
+    sb.from('qr_links').select('url').eq('id', id).single()
+      .then(({ data }) => {
+        const url = data?.url || ''
+        setDest(url); setInput(url); setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [id])
+
+  async function handleSave() {
+    const trimmed = input.trim()
+    if (!trimmed) return
+    setSaving(true)
+    const { error } = await sb.from('qr_links').upsert({ id, url: trimmed }, { onConflict: 'id' })
+    setSaving(false)
+    if (!error) {
+      setDest(trimmed)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    } else alert('Save failed: ' + error.message)
+  }
+
+  function handleCopy() {
+    navigator.clipboard.writeText(dest)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   function handleDownload() {
     if (!qrUrl) return
@@ -97,15 +133,74 @@ function QRCard({ num, qrUrl, onDownload }) {
         </div>
       </div>
 
-      {/* URL */}
+      {/* Permanent URL */}
       <div style={{
         width: '100%', background: 'rgba(44,182,125,0.06)',
         border: '1.5px solid rgba(44,182,125,0.30)',
         borderRadius: 8, padding: '7px 10px',
         fontSize: '0.72rem', fontWeight: 700, color: '#16A34A',
-        textAlign: 'center', letterSpacing: '0.2px',
+        textAlign: 'center',
       }}>
-        www.fofitos.com
+        🔒 www.fofitos.com — Fixed forever
+      </div>
+
+      {/* Redirects to */}
+      <div style={{ width: '100%' }}>
+        <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#9A98A8', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 6 }}>
+          Redirects to
+        </div>
+        <div style={{
+          background: 'rgba(91,33,182,0.04)', border: '1px solid rgba(91,33,182,0.12)',
+          borderRadius: 10, padding: '8px 12px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, minHeight: 40,
+        }}>
+          {loading
+            ? <span style={{ fontSize: '0.72rem', color: '#C0BBCC', fontStyle: 'italic' }}>Loading…</span>
+            : dest
+              ? <>
+                  <span style={{ fontSize: '0.72rem', color: '#5B21B6', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{dest}</span>
+                  <button onClick={handleCopy} style={{ flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', color: copied ? '#2CB67D' : '#7C3AED', fontSize: '0.68rem', fontWeight: 700 }}>
+                    {copied ? '✓ Copied' : '📋 Copy'}
+                  </button>
+                </>
+              : <span style={{ fontSize: '0.72rem', color: '#C0BBCC', fontStyle: 'italic' }}>No destination set</span>
+          }
+        </div>
+      </div>
+
+      {/* Change destination */}
+      <div style={{ width: '100%' }}>
+        <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#9A98A8', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 6 }}>
+          Change destination URL
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <input
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSave()}
+            placeholder="https://your-new-link.com"
+            style={{
+              flex: 1, padding: '8px 10px', borderRadius: 10,
+              border: '1.5px solid #ECEDF2', fontFamily: 'Outfit, sans-serif',
+              fontSize: '0.78rem', color: '#1A1A2E', outline: 'none', background: '#FAFAFA',
+            }}
+            onFocus={e => e.target.style.borderColor = '#7C3AED'}
+            onBlur={e => e.target.style.borderColor = '#ECEDF2'}
+          />
+          <button
+            onClick={handleSave} disabled={saving}
+            style={{
+              flexShrink: 0, padding: '8px 14px', borderRadius: 10, border: 'none',
+              background: saved ? '#2CB67D' : 'linear-gradient(135deg,#5B21B6,#7C3AED)',
+              color: '#fff', fontFamily: 'Outfit, sans-serif',
+              fontSize: '0.78rem', fontWeight: 700,
+              cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.7 : 1,
+            }}
+          >
+            {saving ? '…' : saved ? '✓ Saved' : 'Apply'}
+          </button>
+        </div>
+        <div style={{ fontSize: '0.6rem', color: '#C0BBCC', marginTop: 4 }}>Saved to cloud — works on every device instantly.</div>
       </div>
 
       {/* Download */}
@@ -125,9 +220,7 @@ function QRCard({ num, qrUrl, onDownload }) {
         onMouseEnter={e => { if (qrUrl && !downloading) { e.currentTarget.style.background = 'rgba(91,33,182,0.06)'; e.currentTarget.style.borderColor = '#7C3AED' }}}
         onMouseLeave={e => { if (!downloading) { e.currentTarget.style.background = '#FAFAFA'; e.currentTarget.style.borderColor = '#ECEDF2' }}}
       >
-        {downloading ? (
-          <>✓ Downloading…</>
-        ) : (
+        {downloading ? <>✓ Downloading…</> : (
           <>
             <svg width="13" height="13" fill="none" viewBox="0 0 24 24">
               <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
