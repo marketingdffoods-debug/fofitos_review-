@@ -53,6 +53,7 @@ function QRCard({ num, label: defaultLabel, qrUrl }) {
   const [saving,       setSaving]       = useState(false)
   const [saved,        setSaved]        = useState(false)
   const [copied,       setCopied]       = useState(false)
+  const [confirmUrl,   setConfirmUrl]   = useState(null)
   const [title,        setTitle]        = useState(defaultLabel)
   const [editingTitle, setEditingTitle] = useState(false)
   const [titleInput,   setTitleInput]   = useState(defaultLabel)
@@ -79,14 +80,20 @@ function QRCard({ num, label: defaultLabel, qrUrl }) {
     setEditingTitle(false)
   }
 
-  async function handleSave() {
+  function handleSave() {
     const trimmed = input.trim()
     if (!trimmed) return
+    setConfirmUrl(trimmed)
+  }
+
+  async function confirmSave() {
+    if (!confirmUrl) return
     setSaving(true)
-    const { error } = await sb.from('qr_links').upsert({ id, url: trimmed }, { onConflict: 'id' })
+    setConfirmUrl(null)
+    const { error } = await sb.from('qr_links').upsert({ id, url: confirmUrl }, { onConflict: 'id' })
     setSaving(false)
     if (!error) {
-      setDest(trimmed)
+      setDest(confirmUrl)
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } else alert('Save failed: ' + error.message)
@@ -284,6 +291,50 @@ function QRCard({ num, label: defaultLabel, qrUrl }) {
           </>
         )}
       </button>
+
+      {/* ── Confirm URL change dialog ── */}
+      {confirmUrl && (
+        <div onClick={() => setConfirmUrl(null)} style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)',
+          zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background: '#fff', borderRadius: 18, padding: '28px 24px', width: 340,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.18)',
+            fontFamily: 'Outfit, sans-serif',
+            animation: 'fadeDropdown 0.15s ease',
+          }}>
+            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#1A1A2E', marginBottom: 6 }}>
+              Change Destination?
+            </div>
+            <div style={{ fontSize: '0.78rem', color: '#6B7280', marginBottom: 16, lineHeight: 1.5 }}>
+              The QR code for <strong style={{ color: '#7C3AED' }}>{title}</strong> will redirect to:
+            </div>
+            <div style={{
+              background: 'rgba(91,33,182,0.05)', border: '1.5px solid rgba(91,33,182,0.15)',
+              borderRadius: 10, padding: '10px 12px',
+              fontSize: '0.78rem', color: '#5B21B6', fontWeight: 600,
+              wordBreak: 'break-all', marginBottom: 22,
+            }}>
+              {confirmUrl}
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => setConfirmUrl(null)} style={{
+                flex: 1, padding: '10px', borderRadius: 10,
+                border: '1.5px solid #E5E7EB', background: 'transparent',
+                color: '#374151', fontWeight: 600, fontSize: '0.88rem',
+                cursor: 'pointer', fontFamily: 'Outfit, sans-serif',
+              }}>Cancel</button>
+              <button onClick={confirmSave} style={{
+                flex: 1, padding: '10px', borderRadius: 10, border: 'none',
+                background: 'linear-gradient(135deg,#5B21B6,#7C3AED)',
+                color: '#fff', fontWeight: 700, fontSize: '0.88rem',
+                cursor: 'pointer', fontFamily: 'Outfit, sans-serif',
+              }}>Yes, Apply</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
