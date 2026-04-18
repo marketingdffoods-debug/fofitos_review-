@@ -622,6 +622,44 @@ export default function DetailPage() {
           ))}
         </div>
 
+        {/* ══ MORE FROM THIS CATEGORY ══ */}
+        {savedProducts.filter(x => String(x.id) !== String(productId)).length > 0 && (
+          <div style={{marginTop:12, animation:contentAnim('fadeUp',0.56)}}>
+            <div style={{fontSize:'0.68rem',fontWeight:700,letterSpacing:'1.5px',textTransform:'uppercase',color:'#aaa',marginBottom:10,padding:'0 16px'}}>
+              More from {savedCat?.name || 'this category'}
+            </div>
+            <div style={{
+              display:'flex', gap:10, overflowX:'auto', padding:'4px 16px 12px',
+              scrollbarWidth:'none', msOverflowStyle:'none',
+            }}>
+              {savedProducts.filter(x => String(x.id) !== String(productId)).map(prod => (
+                <div
+                  key={prod.id}
+                  onClick={() => nav(`/product/${prod.id}`, { state: { product: prod, cat: savedCat, products: savedProducts } })}
+                  style={{
+                    flexShrink:0, width:110, background:'#fff', borderRadius:14,
+                    overflow:'hidden', border:'1px solid #EDE8F8', cursor:'pointer',
+                    boxShadow:'0 2px 8px rgba(91,33,182,0.07)',
+                    transition:'transform 0.18s ease, box-shadow 0.18s ease',
+                  }}
+                  onMouseEnter={e=>{e.currentTarget.style.transform='scale(1.04)';e.currentTarget.style.boxShadow='0 6px 18px rgba(91,33,182,0.14)'}}
+                  onMouseLeave={e=>{e.currentTarget.style.transform='scale(1)';e.currentTarget.style.boxShadow='0 2px 8px rgba(91,33,182,0.07)'}}
+                >
+                  <div style={{height:82,background:'#F8F5FF',display:'flex',alignItems:'center',justifyContent:'center',padding:8}}>
+                    <img src={prod.img} alt={prod.name} style={{width:64,height:64,objectFit:'contain'}}/>
+                  </div>
+                  <div style={{padding:'7px 9px 10px'}}>
+                    <div style={{fontSize:'0.68rem',fontWeight:700,color:'#1a1a2e',lineHeight:1.3,
+                      display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
+                      {prod.name}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* ══ FOOTER ══ */}
         <div style={{margin:'16px 16px 0',padding:'20px 18px 28px',borderTop:'1px solid rgba(0,0,0,0.07)',animation:contentAnim('fadeUp',0.64)}}>
           <div style={{fontSize:'0.58rem',fontWeight:600,letterSpacing:'2px',textTransform:'uppercase',color:'#bbb',marginBottom:6}}>A Product Of</div>
@@ -796,6 +834,41 @@ export default function DetailPage() {
                   </div>
                 </div>
               )}
+              {/* More from this category — desktop */}
+              {savedProducts.filter(x => String(x.id) !== String(productId)).length > 0 && (
+                <div style={{ background:'#fff', borderRadius:16, padding:'20px 22px', boxShadow:'0 1px 8px rgba(76,29,149,0.07)' }}>
+                  <div style={{ fontSize:'0.63rem', fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', color:'#C4B5FD', marginBottom:14 }}>
+                    More from {savedCat?.name || 'this category'}
+                  </div>
+                  <div style={{ display:'flex', gap:12, overflowX:'auto', paddingBottom:4, scrollbarWidth:'none', msOverflowStyle:'none' }}>
+                    {savedProducts.filter(x => String(x.id) !== String(productId)).map(prod => (
+                      <div
+                        key={prod.id}
+                        onClick={() => nav(`/product/${prod.id}`, { state: { product: prod, cat: savedCat, products: savedProducts } })}
+                        style={{
+                          flexShrink:0, width:120, background:'#F8F5FF', borderRadius:12,
+                          overflow:'hidden', border:'1px solid #EDE8F8', cursor:'pointer',
+                          boxShadow:'0 1px 6px rgba(91,33,182,0.07)',
+                          transition:'transform 0.18s ease, box-shadow 0.18s ease',
+                        }}
+                        onMouseEnter={e=>{e.currentTarget.style.transform='scale(1.05)';e.currentTarget.style.boxShadow='0 6px 18px rgba(91,33,182,0.15)'}}
+                        onMouseLeave={e=>{e.currentTarget.style.transform='scale(1)';e.currentTarget.style.boxShadow='0 1px 6px rgba(91,33,182,0.07)'}}
+                      >
+                        <div style={{height:90,display:'flex',alignItems:'center',justifyContent:'center',padding:10}}>
+                          <img src={prod.img} alt={prod.name} style={{width:70,height:70,objectFit:'contain'}}/>
+                        </div>
+                        <div style={{padding:'7px 10px 10px',background:'#fff'}}>
+                          <div style={{fontSize:'0.7rem',fontWeight:700,color:'#1a1a2e',lineHeight:1.3,
+                            display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
+                            {prod.name}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
             </div>
 
         </div>

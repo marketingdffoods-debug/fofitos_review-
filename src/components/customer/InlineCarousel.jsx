@@ -267,7 +267,7 @@ export default function InlineCarousel({ cat, skipAnimation = false, initialProd
         }
         @media (min-width: 900px) {
           .carousel-outer { bottom: 40px; }
-          .carousel-inner { width: 100%; max-width: 100%; }
+          .carousel-inner { width: 100%; max-width: 680px; }
         }
       `}</style>
 
