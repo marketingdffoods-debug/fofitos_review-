@@ -145,21 +145,21 @@ export default function HomePage() {
       }}>
         {/* ── Header ── */}
         <div className="home-header-wrap">
-          {/* Left: logo + taglines */}
-          <div style={{ paddingBottom: 22, zIndex: 2, flex: 1 }}>
-            <img src={logoImg} alt="FOFiTOS" style={{ height: 52, objectFit: 'contain', display: 'block' }} />
-            <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '2.5px', color: '#7C3AED', textTransform: 'uppercase', marginTop: 6 }}>
+          {/* Left: logo + taglines — vertically centered */}
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingLeft: 22, zIndex: 2, flex: 1, alignSelf: 'stretch' }}>
+            <img src={logoImg} alt="FOFiTOS" style={{ height: 50, objectFit: 'contain', objectPosition: 'left', display: 'block' }} />
+            <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '2.5px', color: '#7C3AED', textTransform: 'uppercase', marginTop: 6 }}>
               Tasty &nbsp;-&nbsp; Healthy &nbsp;-&nbsp; Everyday
             </div>
-            <div style={{ fontSize: '0.62rem', fontWeight: 500, color: '#999', marginTop: 5 }}>
+            <div style={{ fontSize: '0.6rem', fontWeight: 500, color: '#aaa', marginTop: 4 }}>
               Product of Doctor Farmer Foods
             </div>
           </div>
-          {/* Right: mascot — slightly overflows top for effect */}
+          {/* Right: mascot fills full card height */}
           <img
             src={manLogo}
             alt="mascot"
-            style={{ height: 140, objectFit: 'contain', display: 'block', flexShrink: 0, alignSelf: 'flex-end', marginBottom: 0 }}
+            style={{ height: '100%', width: 'auto', objectFit: 'contain', display: 'block', flexShrink: 0 }}
           />
         </div>
 
