@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import QRCodeLib from 'qrcode'
 import fofitosLogo from '../../assets/qr.png'
-import { sb } from '../../lib/supabase'
 
 const URL = 'https://www.fofitos.com'
 const SIZE = 480
@@ -51,7 +50,7 @@ function QRCard({ num, qrUrl, onDownload }) {
     if (!qrUrl) return
     setDownloading(true)
     const a = document.createElement('a')
-    a.download = `fofitos-qr-${String(num).replace(/\s+/g, '-').toLowerCase()}.png`
+    a.download = `fofitos-qr-${num}.png`
     a.href = qrUrl
     a.click()
     setTimeout(() => setDownloading(false), 1200)
@@ -145,52 +144,37 @@ function QRCard({ num, qrUrl, onDownload }) {
 
 export default function QRPage() {
   const qrUrl = useSharedQR()
-  const [cats, setCats] = useState([])
   const [dlAll, setDlAll] = useState(false)
 
-  useEffect(() => {
-    sb.from('categories').select('id, name').order('sort_order')
-      .then(({ data }) => setCats((data || []).slice(2, 10))) // positions 3–10
-  }, [])
-
   async function downloadAll() {
-    if (!qrUrl || !cats.length) return
+    if (!qrUrl) return
     setDlAll(true)
-    for (const cat of cats) {
+    for (let i = 1; i <= 12; i++) {
       const a = document.createElement('a')
-      a.download = `fofitos-qr-${cat.name.replace(/\s+/g, '-').toLowerCase()}.png`
+      a.download = `fofitos-qr-${i}.png`
       a.href = qrUrl
       a.click()
-      await new Promise(r => setTimeout(r, 250))
+      await new Promise(r => setTimeout(r, 250)) // small delay between downloads
     }
     setDlAll(false)
   }
 
   return (
     <div className="admin-content">
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg) } }
-        .qr-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 20px;
-        }
-        @media (max-width: 1024px) { .qr-grid { grid-template-columns: repeat(3, 1fr); } }
-        @media (max-width: 700px)  { .qr-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; } }
-      `}</style>
+      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
 
       {/* Header */}
       <div style={{ marginBottom: 28, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
         <div>
           <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#1A1A2E' }}>QR Codes</div>
           <div style={{ fontSize: '0.8rem', color: '#9A98A8', marginTop: 4 }}>
-            One permanent QR per category — all encode{' '}
-            <strong style={{ color: '#7C3AED' }}>https://www.fofitos.com</strong> forever.
+            12 permanent QR codes — all encode <strong style={{ color: '#7C3AED' }}>https://www.fofitos.com</strong> forever.
+            Print any of them — they will never change.
           </div>
         </div>
         <button
           onClick={downloadAll}
-          disabled={!qrUrl || !cats.length || dlAll}
+          disabled={!qrUrl || dlAll}
           style={{
             padding: '11px 22px', borderRadius: 12, border: 'none',
             background: dlAll ? '#9A98A8' : 'linear-gradient(135deg,#5B21B6,#7C3AED)',
@@ -208,22 +192,25 @@ export default function QRPage() {
             <polyline points="7 10 12 15 17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
           </svg>
-          {dlAll ? 'Downloading…' : `Download All ${cats.length}`}
+          {dlAll ? 'Downloading…' : 'Download All 12'}
         </button>
       </div>
 
       {/* Grid */}
-      {cats.length === 0 ? (
-        <div style={{ color: '#9A98A8', fontSize: '0.85rem', padding: 32, textAlign: 'center' }}>
-          Loading categories…
-        </div>
-      ) : (
-        <div className="qr-grid">
-          {cats.map(cat => (
-            <QRCard key={cat.id} num={cat.name} qrUrl={qrUrl} />
-          ))}
-        </div>
-      )}
+      <style>{`
+        .qr-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 20px;
+        }
+        @media (max-width: 1024px) { .qr-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 700px)  { .qr-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; } }
+      `}</style>
+      <div className="qr-grid">
+        {Array.from({ length: 12 }, (_, i) => (
+          <QRCard key={i + 1} num={i + 1} qrUrl={qrUrl} />
+        ))}
+      </div>
     </div>
   )
 }
