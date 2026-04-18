@@ -44,7 +44,7 @@ function useSharedQR() {
   return qrUrl
 }
 
-function QRCard({ num, qrUrl }) {
+function QRCard({ num, label, qrUrl }) {
   const id = String(num)
   const [downloading, setDownloading] = useState(false)
   const [dest,    setDest]    = useState('')
@@ -102,7 +102,7 @@ function QRCard({ num, qrUrl }) {
     }}>
       {/* Label */}
       <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#1A1A2E' }}>QR Code {num}</div>
+        <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#1A1A2E' }}>{label}</div>
         <span style={{
           fontSize: '0.56rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase',
           color: '#2CB67D', background: 'rgba(44,182,125,0.10)', borderRadius: 50, padding: '3px 8px',
@@ -236,25 +236,51 @@ function QRCard({ num, qrUrl }) {
 }
 
 export default function QRPage() {
-  const qrUrl = useSharedQR()
+  const qrUrl  = useSharedQR()
+  const [cats, setCats]   = useState([])   // category names fetched from DB
   const [dlAll, setDlAll] = useState(false)
+
+  useEffect(() => {
+    sb.from('categories').select('name').order('sort_order')
+      .then(({ data }) => setCats((data || []).map(c => c.name)))
+  }, [])
+
+  // Build label for each QR number 1-12
+  // QR 3-10 → category name; others → "QR Code N"
+  function labelFor(n) {
+    if (n >= 3 && n <= 10) {
+      const catName = cats[n - 3] // index 0-7 for QR 3-10
+      return catName || `QR Code ${n}`
+    }
+    return `QR Code ${n}`
+  }
 
   async function downloadAll() {
     if (!qrUrl) return
     setDlAll(true)
     for (let i = 1; i <= 12; i++) {
       const a = document.createElement('a')
-      a.download = `fofitos-qr-${i}.png`
+      const label = labelFor(i)
+      a.download = `fofitos-qr-${label.replace(/\s+/g, '-').toLowerCase()}.png`
       a.href = qrUrl
       a.click()
-      await new Promise(r => setTimeout(r, 250)) // small delay between downloads
+      await new Promise(r => setTimeout(r, 250))
     }
     setDlAll(false)
   }
 
   return (
     <div className="admin-content">
-      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg) } }
+        .qr-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 20px;
+        }
+        @media (max-width: 1024px) { .qr-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 700px)  { .qr-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; } }
+      `}</style>
 
       {/* Header */}
       <div style={{ marginBottom: 28, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
@@ -262,7 +288,7 @@ export default function QRPage() {
           <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#1A1A2E' }}>QR Codes</div>
           <div style={{ fontSize: '0.8rem', color: '#9A98A8', marginTop: 4 }}>
             12 permanent QR codes — all encode <strong style={{ color: '#7C3AED' }}>https://www.fofitos.com</strong> forever.
-            Print any of them — they will never change.
+            QR 3–10 are named after your menu categories.
           </div>
         </div>
         <button
@@ -290,18 +316,9 @@ export default function QRPage() {
       </div>
 
       {/* Grid */}
-      <style>{`
-        .qr-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 20px;
-        }
-        @media (max-width: 1024px) { .qr-grid { grid-template-columns: repeat(3, 1fr); } }
-        @media (max-width: 700px)  { .qr-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; } }
-      `}</style>
       <div className="qr-grid">
         {Array.from({ length: 12 }, (_, i) => (
-          <QRCard key={i + 1} num={i + 1} qrUrl={qrUrl} />
+          <QRCard key={i + 1} num={i + 1} label={labelFor(i + 1)} qrUrl={qrUrl} />
         ))}
       </div>
     </div>
