@@ -34,17 +34,17 @@ function avatarColor(name) {
 
 /* ── Apple Watch-style animated activity rings ── */
 function ActivityRings({ pro, fat, carb, fibre, cal, revealed = false }) {
-  const SIZE = 180
-  const C    = SIZE / 2   // 90
-  const SW   = 13         // stroke width
+  const SIZE = 148
+  const C    = SIZE / 2   // 74
+  const SW   = 11         // stroke width
 
   const total = Math.max((pro||0)+(fat||0)+(carb||0)+(fibre||0), 1)
 
   // Three concentric rings: outer → inner
   const rings = [
-    { r:72, color:'#FF2D55', label:'Carbs',   val:carb  || 0 },
-    { r:55, color:'#AAFF00', label:'Protein', val:pro   || 0 },
-    { r:38, color:'#00D8FF', label:'Fat',     val:fat   || 0 },
+    { r:59, color:'#FF2D55', label:'Carbs',   val:carb  || 0 },
+    { r:45, color:'#AAFF00', label:'Protein', val:pro   || 0 },
+    { r:31, color:'#00D8FF', label:'Fat',     val:fat   || 0 },
   ]
 
   // End-point of arc + rotation angle for the arrow tip
@@ -63,10 +63,10 @@ function ActivityRings({ pro, fat, carb, fibre, cal, revealed = false }) {
   return (
     <div style={{display:'flex', alignItems:'center', gap:16}}>
       {/* ── Rings SVG ── */}
-      <div style={{flexShrink:0, borderRadius:'50%', boxShadow:'0 8px 32px rgba(0,0,0,0.38)'}}>
+      <div style={{flexShrink:0}}>
         <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} style={{display:'block'}}>
-          {/* Deep-dark background */}
-          <circle cx={C} cy={C} r={C} fill="#10081E"/>
+          {/* White background */}
+          <circle cx={C} cy={C} r={C} fill="#ffffff"/>
 
           {rings.map((ring, i) => {
             const pct  = ring.val / total
@@ -121,11 +121,11 @@ function ActivityRings({ pro, fat, carb, fibre, cal, revealed = false }) {
           })}
 
           {/* Center: calorie value */}
-          <text x={C} y={C-4} textAnchor="middle"
-            fill="#fff" fontSize="21" fontWeight="800" fontFamily="Outfit,sans-serif"
+          <text x={C} y={C-3} textAnchor="middle"
+            fill="#1a1a2e" fontSize="18" fontWeight="800" fontFamily="Outfit,sans-serif"
           >{cal}</text>
-          <text x={C} y={C+14} textAnchor="middle"
-            fill="rgba(255,255,255,0.35)" fontSize="9" letterSpacing="2.5"
+          <text x={C} y={C+13} textAnchor="middle"
+            fill="#bbb" fontSize="8" letterSpacing="2.5"
             fontFamily="Outfit,sans-serif"
           >KCAL</text>
         </svg>
