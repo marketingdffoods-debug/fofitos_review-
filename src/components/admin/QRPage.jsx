@@ -44,24 +44,40 @@ function useSharedQR() {
   return qrUrl
 }
 
-function QRCard({ num, label, qrUrl }) {
+function QRCard({ num, label: defaultLabel, qrUrl }) {
   const id = String(num)
-  const [downloading, setDownloading] = useState(false)
-  const [dest,    setDest]    = useState('')
-  const [input,   setInput]   = useState('')
-  const [loading, setLoading] = useState(true)
-  const [saving,  setSaving]  = useState(false)
-  const [saved,   setSaved]   = useState(false)
-  const [copied,  setCopied]  = useState(false)
+  const [downloading,  setDownloading]  = useState(false)
+  const [dest,         setDest]         = useState('')
+  const [input,        setInput]        = useState('')
+  const [loading,      setLoading]      = useState(true)
+  const [saving,       setSaving]       = useState(false)
+  const [saved,        setSaved]        = useState(false)
+  const [copied,       setCopied]       = useState(false)
+  const [title,        setTitle]        = useState(defaultLabel)
+  const [editingTitle, setEditingTitle] = useState(false)
+  const [titleInput,   setTitleInput]   = useState(defaultLabel)
+  const [savingTitle,  setSavingTitle]  = useState(false)
 
   useEffect(() => {
-    sb.from('qr_links').select('url').eq('id', id).single()
+    sb.from('qr_links').select('url, label').eq('id', id).maybeSingle()
       .then(({ data }) => {
         const url = data?.url || ''
-        setDest(url); setInput(url); setLoading(false)
+        setDest(url); setInput(url)
+        if (data?.label) { setTitle(data.label); setTitleInput(data.label) }
+        setLoading(false)
       })
       .catch(() => setLoading(false))
   }, [id])
+
+  async function saveTitle() {
+    const trimmed = titleInput.trim()
+    if (!trimmed) return
+    setSavingTitle(true)
+    await sb.from('qr_links').upsert({ id, label: trimmed }, { onConflict: 'id' })
+    setTitle(trimmed)
+    setSavingTitle(false)
+    setEditingTitle(false)
+  }
 
   async function handleSave() {
     const trimmed = input.trim()
@@ -100,21 +116,13 @@ function QRCard({ num, label, qrUrl }) {
       padding: '20px 16px 16px',
       display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14,
     }}>
-      {/* Label */}
-      <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#1A1A2E' }}>{label}</div>
-        <span style={{
-          fontSize: '0.56rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase',
-          color: '#2CB67D', background: 'rgba(44,182,125,0.10)', borderRadius: 50, padding: '3px 8px',
-        }}>Permanent</span>
-      </div>
-
       {/* QR image */}
       <div style={{ position: 'relative' }}>
         <div style={{
           position: 'absolute', inset: -10, borderRadius: 16,
           background: 'linear-gradient(135deg,rgba(91,33,182,0.06),rgba(124,58,237,0.02))',
           border: '1.5px dashed rgba(91,33,182,0.18)',
+          pointerEvents: 'none',
         }}/>
         <div style={{
           background: '#fff', padding: 10, borderRadius: 12,
@@ -128,8 +136,53 @@ function QRCard({ num, label, qrUrl }) {
               </div>
           }
         </div>
-        <div style={{ textAlign: 'center', marginTop: 8, fontWeight: 800, fontSize: '0.6rem', letterSpacing: '2px', color: '#7C3AED', textTransform: 'uppercase' }}>
-          FOFiTOS Kitchen
+
+        {/* Editable title below QR */}
+        <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, position: 'relative', zIndex: 2 }}>
+          {editingTitle ? (
+            <>
+              <input
+                autoFocus
+                value={titleInput}
+                onChange={e => setTitleInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') saveTitle(); if (e.key === 'Escape') setEditingTitle(false) }}
+                style={{
+                  width: 120, fontSize: '0.78rem', fontWeight: 800, color: '#7C3AED',
+                  textAlign: 'center', letterSpacing: '1px', textTransform: 'uppercase',
+                  border: 'none', borderBottom: '2px solid #7C3AED', outline: 'none',
+                  background: 'transparent', fontFamily: 'Outfit, sans-serif', padding: '1px 0',
+                }}
+              />
+              <button onClick={saveTitle} disabled={savingTitle} style={{
+                background: '#7C3AED', border: 'none', borderRadius: 5,
+                color: '#fff', fontSize: '0.65rem', fontWeight: 700, padding: '2px 7px',
+                cursor: 'pointer',
+              }}>{savingTitle ? '…' : '✓'}</button>
+              <button onClick={() => setEditingTitle(false)} style={{
+                background: 'none', border: 'none', color: '#9A98A8',
+                fontSize: '0.75rem', cursor: 'pointer', padding: '1px 3px',
+              }}>✕</button>
+            </>
+          ) : (
+            <>
+              <div style={{ fontWeight: 800, fontSize: '0.6rem', letterSpacing: '2px', color: '#7C3AED', textTransform: 'uppercase' }}>
+                {title}
+              </div>
+              <button onClick={() => { setTitleInput(title); setEditingTitle(true) }} title="Rename" style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: '#C0BBCC', padding: '1px 3px', borderRadius: 4,
+                display: 'flex', alignItems: 'center', transition: 'color 0.15s',
+              }}
+                onMouseEnter={e => e.currentTarget.style.color = '#7C3AED'}
+                onMouseLeave={e => e.currentTarget.style.color = '#C0BBCC'}
+              >
+                <svg width="11" height="11" fill="none" viewBox="0 0 24 24">
+                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </>
+          )}
         </div>
       </div>
 

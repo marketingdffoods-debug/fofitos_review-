@@ -394,14 +394,12 @@ export default function ProductsPage() {
                   <tr>
                     <th>Item</th>
                     <th>Category</th>
-                    <th>Price</th>
-                    <th>Rating</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filtered.length === 0 && (
-                    <tr><td colSpan={5} style={{ textAlign: 'center', color: 'var(--muted)', padding: 32 }}>No products found.</td></tr>
+                    <tr><td colSpan={3} style={{ textAlign: 'center', color: 'var(--muted)', padding: 32 }}>No products found.</td></tr>
                   )}
                   {filtered.map(p => (
                     <tr key={p.id}>
@@ -415,8 +413,6 @@ export default function ProductsPage() {
                         </div>
                       </td>
                       <td><span className="badge badge-cat">{p.cat}</span></td>
-                      <td><span className="badge badge-price">{p.price}</span></td>
-                      <td><span className="stars">{'★'.repeat(Math.round(p.rating || 0))}</span> {p.rating}</td>
                       <td>
                         <div className="action-btns">
                           <button className="btn btn-ghost btn-sm" onClick={() => openEdit(p.id)}>Edit</button>
@@ -476,10 +472,6 @@ export default function ProductsPage() {
                     {cats.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                 </div>
-                <div className="form-group">
-                  <label className="f-label">Price</label>
-                  <input className="f-input" value={form.price} onChange={e => set('price', e.target.value)} placeholder="₹299" />
-                </div>
                 <div className="form-group full">
                   <label className="f-label">Tagline</label>
                   <input className="f-input" value={form.tagline} onChange={e => set('tagline', e.target.value)} placeholder="Short description" />
@@ -487,14 +479,6 @@ export default function ProductsPage() {
                 <div className="form-group full">
                   <label className="f-label">Product Image</label>
                   <ImageUpload value={form.img} onChange={v => set('img', v)} />
-                </div>
-                <div className="form-group">
-                  <label className="f-label">Rating</label>
-                  <input className="f-input" type="number" step="0.1" min="0" max="5" value={form.rating} onChange={e => set('rating', e.target.value)} />
-                </div>
-                <div className="form-group">
-                  <label className="f-label">Review Count</label>
-                  <input className="f-input" type="number" value={form.reviews} onChange={e => set('reviews', e.target.value)} />
                 </div>
               </div>
 
@@ -517,12 +501,6 @@ export default function ProductsPage() {
               <div className="form-section">Ingredients</div>
               <IngrEditor rows={form.ingr} onChange={v => set('ingr', v)} />
 
-              {editing && (
-                <>
-                  <div className="form-section">⭐ Customer Reviews</div>
-                  <ProductReviews productId={form.id} />
-                </>
-              )}
             </div>
             <div className="modal-footer">
               <button className="btn btn-ghost" onClick={() => setModal(false)}>Cancel</button>

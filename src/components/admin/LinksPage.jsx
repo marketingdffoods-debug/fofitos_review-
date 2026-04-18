@@ -102,7 +102,7 @@ export default function LinksPage() {
           {loading ? <div className="loading">Loading…</div> : (
             <>
               {/* ── Order Links ── */}
-              <Section title="🛒  Order & Review Buttons">
+              <Section title="Order & Review Buttons">
                 <p style={{ fontSize:'0.76rem', color:'var(--muted)', marginBottom:18 }}>
                   When a customer taps a button on the product page they'll open this link in a new tab.
                 </p>
@@ -112,7 +112,7 @@ export default function LinksPage() {
               </Section>
 
               {/* ── Footer Content ── */}
-              <Section title="📄  Footer Content">
+              <Section title="Footer Content">
                 <p style={{ fontSize:'0.76rem', color:'var(--muted)', marginBottom:18 }}>
                   These values appear in the footer across all pages. Leave a field blank to keep the default.
                 </p>
