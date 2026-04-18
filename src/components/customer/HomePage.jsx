@@ -145,25 +145,32 @@ export default function HomePage() {
       }}>
         {/* ── Header ── */}
         <div className="home-header-wrap">
-          {/* Left: logo + taglines — vertically centered */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingLeft: 22, zIndex: 2, flex: 1, alignSelf: 'stretch' }}>
-            <img src={logoImg} alt="FOFiTOS" style={{ height: 50, objectFit: 'contain', objectPosition: 'left', display: 'block' }} />
-            <div style={{ fontSize: '0.6rem', fontWeight: 500, color: '#aaa', marginTop: 4 }}>
-              Product of Doctor Farmer Foods
+          {/* White card with text */}
+          <div className="home-header-card">
+            {/* Left: logo + tagline */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, zIndex: 2 }}>
+              <img src={logoImg} alt="FOFiTOS" style={{ height: 52, objectFit: 'contain', objectPosition: 'left', display: 'block' }} />
+              <div style={{ fontSize: '0.6rem', fontWeight: 500, color: '#aaa' }}>
+                Product of Doctor Farmer Foods
+              </div>
             </div>
+            {/* Spacer so mascot doesn't overlap text */}
+            <div style={{ width: 160, flexShrink: 0 }} />
           </div>
-          {/* Right: mascot scaled up to fill the card */}
+
+          {/* Mascot — absolutely positioned, floats above the card on the right */}
           <img
             src={manLogo}
             alt="mascot"
             style={{
-              height: '100%',
+              position: 'absolute',
+              right: 0,
+              bottom: 0,
+              height: 190,
               width: 'auto',
               objectFit: 'contain',
               display: 'block',
-              flexShrink: 0,
-              transform: 'scale(1.45)',
-              transformOrigin: 'right center',
+              pointerEvents: 'none',
             }}
           />
         </div>
