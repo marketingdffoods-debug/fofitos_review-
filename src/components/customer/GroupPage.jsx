@@ -120,8 +120,8 @@ export default function GroupPage() {
           to   { opacity: 1; transform: translateY(0) scale(1); }
         }
         @keyframes pageSlideUp {
-          from { transform: translateY(100vh); }
-          to   { transform: translateY(0); }
+          from { opacity: 0; transform: translateY(14px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
         .grp-wrap { padding: 16px 16px 40px; }
         .prod-grid {
@@ -139,8 +139,7 @@ export default function GroupPage() {
       <div style={{
         minHeight: '100vh',
         background: '#EDEAF8',
-        animation: 'pageSlideUp 0.42s cubic-bezier(0.22,1,0.36,1) both',
-        willChange: 'transform',
+        animation: 'pageSlideUp 0.32s ease both',
       }}>
 
         {/* ── Header ── */}
