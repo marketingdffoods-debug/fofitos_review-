@@ -110,17 +110,17 @@ body {
    Shared Header component  (Header.jsx)
    ════════════════════════════════════════════════════════ */
 
-/* Outer flex row: [← btn?] [card+mascot] */
+/* Outer column: [← btn above] then [card+mascot] */
 .hdr-outer {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 10px;
   padding: 16px 16px 0;
 }
 
-/* Back button circle */
+/* Back button circle — sits above the card */
 .hdr-back-btn {
-  flex-shrink: 0;
   width: 40px; height: 40px;
   border-radius: 50%;
   border: 1.5px solid rgba(91,33,182,0.18);
@@ -132,9 +132,9 @@ body {
   transition: background 0.2s, color 0.2s;
 }
 
-/* Card + mascot container */
+/* Card + mascot container — full width */
 .hdr-card-wrap {
-  flex: 1;
+  width: 100%;
   position: relative;
   height: 128px;
 }
@@ -212,9 +212,10 @@ body {
   .hdr-outer {
     max-width: 980px;
     margin: 24px auto 0;
-    padding: 0;
+    padding: 0 0 0;
+    width: calc(100% - 48px);
   }
-  .hdr-card-wrap { height: 165px; }
+  .hdr-card-wrap { height: 165px; width: 100%; }
   .hdr-logo-img  { height: 90px; }
   .hdr-mascot-wrap { width: 48%; height: calc(100% + 28px); }
 }

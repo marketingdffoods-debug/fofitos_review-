@@ -5,7 +5,7 @@ import manLogo from '../../assets/man-logo.png'
 /**
  * Shared page header.
  * Props:
- *   showBack  — show the ← circle button to the left of the card (default false)
+ *   showBack  — show the ← circle button above the card (default false)
  *   onBack    — override back action (default: navigate to '/')
  */
 export default function Header({ showBack = false, onBack }) {
@@ -15,7 +15,7 @@ export default function Header({ showBack = false, onBack }) {
   return (
     <div className="hdr-outer">
 
-      {/* ← Back button — only on inner pages */}
+      {/* ← Back button — sits above the card */}
       {showBack && (
         <button
           onClick={handleBack}
