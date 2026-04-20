@@ -22,7 +22,7 @@ export default function Header({ showBack = false, onBack }) {
           className="hdr-back-btn"
           onMouseEnter={e => { e.currentTarget.style.background = '#5B21B6'; e.currentTarget.style.color = '#fff' }}
           onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = '#5B21B6' }}
-        >←</button>
+        >‹</button>
       )}
 
       {/* Card + mascot wrapper */}
