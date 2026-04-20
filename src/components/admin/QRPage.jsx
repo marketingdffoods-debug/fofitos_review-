@@ -5,38 +5,54 @@ import { sb } from '../../lib/supabase'
 
 const SIZE = 480
 
+/* Cache the logo so all 12 cards share one loaded image */
+let _logoCache = null
+function loadLogo() {
+  if (_logoCache) return Promise.resolve(_logoCache)
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => { _logoCache = img; resolve(img) }
+    img.onerror = reject
+    img.src = fofitosLogo
+  })
+}
+
 /* Build a QR image for a specific /go/:num URL */
 async function buildQR(num) {
-  const targetUrl = `${window.location.origin}/go/${num}`
+  try {
+    const targetUrl = `${window.location.origin}/go/${num}`
 
-  const qrDataUrl = await QRCodeLib.toDataURL(targetUrl, {
-    width: SIZE, margin: 2,
-    color: { dark: '#000000', light: '#ffffff' },
-    errorCorrectionLevel: 'H',
-  })
+    const qrDataUrl = await QRCodeLib.toDataURL(targetUrl, {
+      width: SIZE, margin: 2,
+      color: { dark: '#000000', light: '#ffffff' },
+      errorCorrectionLevel: 'H',
+    })
 
-  const canvas = document.createElement('canvas')
-  canvas.width = canvas.height = SIZE
-  const ctx = canvas.getContext('2d')
+    const canvas = document.createElement('canvas')
+    canvas.width = canvas.height = SIZE
+    const ctx = canvas.getContext('2d')
 
-  const qrImg = new Image()
-  await new Promise(r => { qrImg.onload = r; qrImg.src = qrDataUrl })
-  ctx.drawImage(qrImg, 0, 0, SIZE, SIZE)
+    const qrImg = new Image()
+    await new Promise((res, rej) => { qrImg.onload = res; qrImg.onerror = rej; qrImg.src = qrDataUrl })
+    ctx.drawImage(qrImg, 0, 0, SIZE, SIZE)
 
-  const cx = SIZE / 2, cy = SIZE / 2, r = SIZE * 0.14
-  ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r + 6, 0, Math.PI * 2)
-  ctx.fillStyle = '#fff'; ctx.fill(); ctx.restore()
+    const cx = SIZE / 2, cy = SIZE / 2, r = SIZE * 0.14
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r + 6, 0, Math.PI * 2)
+    ctx.fillStyle = '#fff'; ctx.fill(); ctx.restore()
 
-  const logo = new Image()
-  await new Promise(res => { logo.onload = res; logo.src = fofitosLogo })
-  const logoR = r - 2
-  ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, logoR, 0, Math.PI * 2)
-  ctx.clip(); ctx.drawImage(logo, cx - logoR, cy - logoR, logoR * 2, logoR * 2); ctx.restore()
+    const logo = await loadLogo()
+    const logoR = r - 2
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, logoR, 0, Math.PI * 2)
+    ctx.clip(); ctx.drawImage(logo, cx - logoR, cy - logoR, logoR * 2, logoR * 2); ctx.restore()
 
-  ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r + 6, 0, Math.PI * 2)
-  ctx.strokeStyle = 'rgba(91,33,182,0.25)'; ctx.lineWidth = 2.5; ctx.stroke(); ctx.restore()
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r + 6, 0, Math.PI * 2)
+    ctx.strokeStyle = 'rgba(91,33,182,0.25)'; ctx.lineWidth = 2.5; ctx.stroke(); ctx.restore()
 
-  return canvas.toDataURL('image/png')
+    return canvas.toDataURL('image/png')
+  } catch (e) {
+    console.error('QR build error', e)
+    return ''
+  }
 }
 
 function QRCard({ num, label: defaultLabel }) {
