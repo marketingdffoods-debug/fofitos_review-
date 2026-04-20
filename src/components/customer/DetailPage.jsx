@@ -42,9 +42,9 @@ function ActivityRings({ pro, fat, carb, fibre, cal, revealed = false }) {
 
   // Three concentric rings: outer → inner
   const rings = [
-    { r:52, color:'#FF2D55', label:'Carbs',   val:carb  || 0 },
-    { r:39, color:'#AAFF00', label:'Protein', val:pro   || 0 },
-    { r:26, color:'#00D8FF', label:'Fat',     val:fat   || 0 },
+    { r:52, color:'#4A90D9', label:'Carbs',   val:carb  || 0 },
+    { r:39, color:'#2CB67D', label:'Protein', val:pro   || 0 },
+    { r:26, color:'#E09A2C', label:'Fat',     val:fat   || 0 },
   ]
 
   // End-point of arc + rotation angle for the arrow tip
@@ -54,9 +54,9 @@ function ActivityRings({ pro, fat, carb, fibre, cal, revealed = false }) {
   }
 
   const legend = [
-    { l:'Carbs',   pct:Math.round((carb  ||0)/total*100), c:'#FF2D55' },
-    { l:'Protein', pct:Math.round((pro   ||0)/total*100), c:'#AAFF00' },
-    { l:'Fat',     pct:Math.round((fat   ||0)/total*100), c:'#00D8FF' },
+    { l:'Carbs',   pct:Math.round((carb  ||0)/total*100), c:'#4A90D9' },
+    { l:'Protein', pct:Math.round((pro   ||0)/total*100), c:'#2CB67D' },
+    { l:'Fat',     pct:Math.round((fat   ||0)/total*100), c:'#E09A2C' },
     { l:'Fibre',   pct:Math.round((fibre ||0)/total*100), c:'#C8BEA8' },
   ]
 
@@ -100,7 +100,7 @@ function ActivityRings({ pro, fat, carb, fibre, cal, revealed = false }) {
                     transition: revealed
                       ? `stroke-dasharray 1.0s ${i*0.22}s cubic-bezier(0.22,1,0.36,1)`
                       : 'none',
-                    filter: revealed ? `drop-shadow(0 0 3px ${ring.color}80)` : 'none',
+                    filter: 'none',
                   }}
                 />
                 {/* Arrow chevron at the tip of each ring */}
