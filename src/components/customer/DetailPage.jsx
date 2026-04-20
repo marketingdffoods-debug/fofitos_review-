@@ -623,31 +623,6 @@ export default function DetailPage() {
           </div>
         )}
 
-        {/* ══ REVIEWS ══ */}
-        <div style={{margin:'12px 16px 0',animation:contentAnim('fadeUp',0.52)}}>
-          <div style={{fontSize:'0.68rem',fontWeight:700,letterSpacing:'1.5px',textTransform:'uppercase',color:'#aaa',marginBottom:14}}>What Customers Say</div>
-          {allRevs.length===0&&<div style={{color:'#ccc',fontSize:'0.82rem',padding:'8px 0'}}>No reviews yet. Be the first!</div>}
-          {allRevs.map((r,i)=>{
-            const ini=r.ini||(r.name?r.name[0]:'?')
-            const bg=r.bg||avatarColor(r.name||'A')
-            const date=r.date||(r.created_at?new Date(r.created_at).toLocaleDateString():'')
-            return (
-              <div key={i} style={{background:'#fff',borderRadius:14,padding:'14px',border:'1px solid #EDE8F8',marginBottom:10,boxShadow:'0 1px 4px rgba(0,0,0,0.04)'}}>
-                <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:6}}>
-                  <div style={{width:32,height:32,borderRadius:'50%',background:bg,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'0.72rem',fontWeight:700,color:'#fff',flexShrink:0}}>{ini}</div>
-                  <div>
-                    <div style={{fontSize:'0.82rem',fontWeight:700,color:'#1a1a2e'}}>{r.name}</div>
-                    <div style={{fontSize:'0.68rem',color:'#ccc'}}>{date}</div>
-                  </div>
-                </div>
-                <div style={{color:'#F59E0B',fontSize:'0.8rem',marginBottom:4}}>{starStr(r.stars||r.rating)}</div>
-                <div style={{fontSize:'0.8rem',color:'#666',lineHeight:1.5}}>{r.txt||r.text}</div>
-                {(r.v||r.verified)&&<span style={{display:'inline-flex',alignItems:'center',gap:4,marginTop:6,padding:'3px 8px',borderRadius:50,background:'rgba(44,182,125,0.08)',fontSize:'0.67rem',color:'#2CB67D',fontWeight:600}}>✓ Verified Order</span>}
-              </div>
-            )
-          })}
-        </div>
-
         {/* ══ PROMISE ══ */}
         <div style={{margin:'12px 16px 0',padding:'18px',borderRadius:16,background:'linear-gradient(135deg,rgba(91,33,182,0.04),rgba(124,58,237,0.08))',border:'1.5px solid rgba(91,33,182,0.1)',animation:contentAnim('fadeUp',0.58)}}>
           <div style={{fontSize:'0.68rem',fontWeight:700,letterSpacing:'2px',textTransform:'uppercase',color:'#7B2CBF',marginBottom:12}}>The Fofitos Promise</div>
@@ -828,33 +803,6 @@ export default function DetailPage() {
                 </div>
               )}
 
-              {/* Reviews */}
-              {allRevs.length > 0 && (
-                <div style={{ background:'#fff', borderRadius:16, padding:'20px 22px', boxShadow:'0 1px 8px rgba(76,29,149,0.07)' }}>
-                  <div style={{ fontSize:'0.63rem', fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', color:'#C4B5FD', marginBottom:14 }}>What Customers Say</div>
-                  <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-                    {allRevs.map((r,i) => {
-                      const ini = r.ini||(r.name?r.name[0]:'?')
-                      const bg  = r.bg||avatarColor(r.name||'A')
-                      const date= r.date||(r.created_at?new Date(r.created_at).toLocaleDateString():'')
-                      return (
-                        <div key={i} style={{ borderRadius:12, padding:'14px', border:'1px solid #EDE8F8', background:'#FAF8FF' }}>
-                          <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:6 }}>
-                            <div style={{ width:32, height:32, borderRadius:'50%', background:bg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.72rem', fontWeight:700, color:'#fff', flexShrink:0 }}>{ini}</div>
-                            <div>
-                              <div style={{ fontSize:'0.82rem', fontWeight:700, color:'#1a1a2e' }}>{r.name}</div>
-                              <div style={{ fontSize:'0.67rem', color:'#ccc' }}>{date}</div>
-                            </div>
-                          </div>
-                          <div style={{ color:'#F59E0B', fontSize:'0.78rem', marginBottom:4 }}>{starStr(r.stars||r.rating)}</div>
-                          <div style={{ fontSize:'0.78rem', color:'#666', lineHeight:1.5 }}>{r.txt||r.text}</div>
-                          {(r.v||r.verified) && <span style={{ display:'inline-flex', alignItems:'center', gap:4, marginTop:6, padding:'2px 8px', borderRadius:50, background:'rgba(123,44,191,0.08)', fontSize:'0.65rem', color:'#7B2CBF', fontWeight:600 }}>✓ Verified Order</span>}
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
               {/* More from this category — desktop */}
               {savedProducts.filter(x => String(x.id) !== String(productId)).length > 0 && (
                 <div style={{ background:'#fff', borderRadius:16, padding:'20px 22px', boxShadow:'0 1px 8px rgba(76,29,149,0.07)' }}>
