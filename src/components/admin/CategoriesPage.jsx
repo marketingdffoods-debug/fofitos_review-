@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { sb } from '../../lib/supabase'
 import ImageUpload from './ImageUpload'
 
-const EMPTY_CAT = { id: '', name: '', description: '', img: '', video_url: '', sort_order: 0 }
+const EMPTY_CAT = { id: '', name: '', description: '', img: '', video_url: '', sort_order: 0, group_name: '' }
 
 /* ── Product drag-and-drop reorder modal ── */
 function ProductOrderModal({ cat, onClose, onSaved }) {
@@ -145,7 +145,7 @@ export default function CategoriesPage() {
   }
 
   function openEdit(cat) {
-    setForm({ ...cat })
+    setForm({ ...EMPTY_CAT, ...cat, group_name: cat.group_name || '' })
     setEditing(true)
     setModal(true)
   }
@@ -153,10 +153,18 @@ export default function CategoriesPage() {
   async function handleSave() {
     if (!form.id || !form.name) return
     setSaving(true)
+    const payload = {
+      name: form.name,
+      description: form.description,
+      img: form.img,
+      video_url: form.video_url || null,
+      sort_order: form.sort_order,
+      group_name: form.group_name?.trim() || null,
+    }
     if (editing) {
-      await sb.from('categories').update({ name: form.name, description: form.description, img: form.img, video_url: form.video_url || null, sort_order: form.sort_order }).eq('id', form.id)
+      await sb.from('categories').update(payload).eq('id', form.id)
     } else {
-      await sb.from('categories').insert({ id: form.id, name: form.name, description: form.description, img: form.img, video_url: form.video_url || null, sort_order: form.sort_order })
+      await sb.from('categories').insert({ id: form.id, ...payload })
     }
     setSaving(false)
     setModal(false)
@@ -188,6 +196,7 @@ export default function CategoriesPage() {
                     <th>Image</th>
                     <th>ID</th>
                     <th>Name</th>
+                    <th>Group</th>
                     <th>Description</th>
                     <th>Order</th>
                     <th>Actions</th>
@@ -204,6 +213,15 @@ export default function CategoriesPage() {
                       <td><img className="img-thumb" src={c.img} alt={c.name} /></td>
                       <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{c.id}</td>
                       <td><strong>{c.name}</strong></td>
+                      <td>
+                        {c.group_name ? (
+                          <span style={{
+                            display: 'inline-block', padding: '2px 10px',
+                            borderRadius: 50, fontSize: '0.72rem', fontWeight: 600,
+                            background: 'rgba(91,33,182,0.10)', color: 'var(--purple)',
+                          }}>{c.group_name}</span>
+                        ) : <span style={{ color: 'var(--muted)', fontSize: '0.78rem' }}>—</span>}
+                      </td>
                       <td style={{ color: 'var(--muted)' }}>{c.description}</td>
                       <td>{c.sort_order}</td>
                       <td onClick={e => e.stopPropagation()}>
@@ -241,6 +259,35 @@ export default function CategoriesPage() {
                 <div className="form-group full">
                   <label className="f-label">Name *</label>
                   <input className="f-input" value={form.name} onChange={e => set('name', e.target.value)} placeholder="e.g. Burgers" />
+                </div>
+                <div className="form-group full">
+                  <label className="f-label">
+                    Group Name
+                    <span style={{ fontWeight: 400, color: 'var(--muted)', marginLeft: 6 }}>
+                      (optional — categories sharing the same group name appear under one card)
+                    </span>
+                  </label>
+                  <input
+                    className="f-input"
+                    list="group-name-suggestions"
+                    value={form.group_name || ''}
+                    onChange={e => set('group_name', e.target.value)}
+                    placeholder="e.g. Bowls  (leave blank for standalone)"
+                  />
+                  <datalist id="group-name-suggestions">
+                    {[...new Set(cats.map(c => c.group_name).filter(Boolean))].map(g => (
+                      <option key={g} value={g} />
+                    ))}
+                  </datalist>
+                  {form.group_name?.trim() && (
+                    <div style={{
+                      marginTop: 7, padding: '7px 12px', borderRadius: 8,
+                      background: 'rgba(91,33,182,0.07)', border: '1px solid rgba(91,33,182,0.14)',
+                      fontSize: '0.76rem', color: 'var(--purple)',
+                    }}>
+                      💡 This category will appear as a sub-section inside the <strong>"{form.group_name.trim()}"</strong> group card on the home page.
+                    </div>
+                  )}
                 </div>
                 <div className="form-group full">
                   <label className="f-label">Description</label>
