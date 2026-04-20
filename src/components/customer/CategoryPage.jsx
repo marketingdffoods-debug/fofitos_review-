@@ -249,20 +249,29 @@ export default function CategoryPage() {
           {/* ② Card + mascot wrapper */}
           <div className="cat-hdr-card-wrap">
 
-            {/* White card — clips content at rounded corners */}
+            {/* Glossy card */}
             <div style={{
               position: 'absolute', inset: 0,
-              background: '#fff',
+              background: 'linear-gradient(155deg, rgba(255,255,255,0.88) 0%, rgba(232,226,255,0.78) 100%)',
+              backdropFilter: 'blur(28px)',
+              WebkitBackdropFilter: 'blur(28px)',
               borderRadius: 22,
-              border: '1px solid rgba(0,0,0,0.06)',
-              boxShadow: '0 2px 16px rgba(91,33,182,0.07)',
+              border: '1.5px solid rgba(255,255,255,0.75)',
+              boxShadow: '0 8px 32px rgba(91,33,182,0.14), inset 0 1.5px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(91,33,182,0.06)',
               overflow: 'hidden',
             }}>
+              {/* Gloss shine overlay */}
+              <div style={{
+                position: 'absolute', inset: 0, borderRadius: 22,
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.10) 46%, rgba(255,255,255,0) 100%)',
+                pointerEvents: 'none', zIndex: 0,
+              }}/>
               {/* FOFiTOS logo — right edge reserved for mascot */}
               <div style={{
                 position: 'absolute',
                 left: 18, right: 130, top: 0, bottom: 0,
                 display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 5,
+                zIndex: 1,
               }}>
                 <img src={logoImg} alt="FOFiTOS" style={{ height: 58, objectFit: 'contain', objectPosition: 'left', display: 'block' }} />
                 <div style={{ fontSize: '0.62rem', fontWeight: 500, color: '#bbb', letterSpacing: '0.3px' }}>

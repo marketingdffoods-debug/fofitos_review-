@@ -106,16 +106,35 @@ body {
   gap: 16px;
 }
 
-/* ── Home header wrapper ── */
+/* ── Home header wrapper — glassy ── */
 .home-header-wrap {
   margin: 16px 16px 0;
-  background: #ffffff;
+  background: linear-gradient(155deg, rgba(255,255,255,0.88) 0%, rgba(232,226,255,0.78) 100%);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
   border-radius: 22px;
-  border: 1px solid rgba(0,0,0,0.06);
-  box-shadow: 0 2px 16px rgba(91,33,182,0.07);
+  border: 1.5px solid rgba(255,255,255,0.75);
+  box-shadow:
+    0 8px 32px rgba(91,33,182,0.14),
+    0 1.5px 0 rgba(255,255,255,0.95) inset,
+    0 -1px 0 rgba(91,33,182,0.06) inset;
   overflow: hidden;
   height: 155px;
   position: relative;
+}
+/* Gloss shine — top half bright reflection */
+.home-header-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  background: linear-gradient(180deg,
+    rgba(255,255,255,0.60) 0%,
+    rgba(255,255,255,0.12) 45%,
+    rgba(255,255,255,0)    100%
+  );
+  pointer-events: none;
+  z-index: 0;
 }
 .home-header-card { display: contents; }
 
