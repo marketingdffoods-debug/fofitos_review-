@@ -149,6 +149,36 @@ export default function CategoryPage() {
           to   { transform: translateY(0); }
         }
 
+        /* ── Header row ── */
+        .cat-hdr-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 16px 16px 0;
+        }
+        .cat-hdr-card-wrap {
+          flex: 1;
+          position: relative;
+          height: 118px;
+        }
+        .cat-hdr-mascot-wrap {
+          position: absolute;
+          right: 0; top: 0;
+          width: 130px;
+          height: calc(100% + 22px);   /* extends 22px below card */
+          pointer-events: none;
+          z-index: 3;
+        }
+        @media (min-width: 900px) {
+          .cat-hdr-row {
+            max-width: 980px;
+            margin: 24px auto 0;
+            padding: 0;
+          }
+          .cat-hdr-card-wrap { height: 155px; }
+          .cat-hdr-mascot-wrap { width: 200px; }
+        }
+
         /* ── Video wrapper ── */
         .cat-video-wrap {
           margin: 14px 16px 0;
@@ -196,43 +226,55 @@ export default function CategoryPage() {
         willChange: 'transform',
       }}>
 
-        {/* ── Header ── */}
-        <div className="home-header-wrap">
-          {/* Back button */}
+        {/* ── Header: [← button] [card + mascot] ── */}
+        <div className="cat-hdr-row">
+
+          {/* ① Back button — standalone, outside the white card */}
           <button
             onClick={() => nav('/')}
             style={{
-              position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
-              width: 36, height: 36, borderRadius: '50%',
-              border: '1.5px solid rgba(91,33,182,0.15)',
-              background: 'rgba(255,255,255,0.85)',
-              backdropFilter: 'blur(8px)',
+              flexShrink: 0,
+              width: 38, height: 38, borderRadius: '50%',
+              border: '1.5px solid rgba(91,33,182,0.18)',
+              background: '#fff',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: 'pointer', fontSize: '1.1rem', color: '#5B21B6',
-              zIndex: 10, boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-              pointerEvents: 'auto',
+              boxShadow: '0 2px 10px rgba(91,33,182,0.12)',
+              transition: 'background 0.2s, color 0.2s',
             }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#5B21B6'; e.currentTarget.style.color = '#fff' }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = '#5B21B6' }}
           >←</button>
 
-          {/* Logo — left of center */}
-          <div style={{
-            position: 'absolute', left: 64, top: 0, bottom: 0,
-            display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 6,
-            zIndex: 2,
-          }}>
-            <img src={logoImg} alt="FOFiTOS" style={{ height: 70, objectFit: 'contain', objectPosition: 'left', display: 'block' }} />
-            <div style={{ fontSize: '0.65rem', fontWeight: 500, color: '#aaa', letterSpacing: '0.3px' }}>
-              Product of Doctor Farmer Foods
-            </div>
-          </div>
+          {/* ② Card + mascot wrapper */}
+          <div className="cat-hdr-card-wrap">
 
-          {/* Mascot — right edge */}
-          <div style={{
-            position: 'absolute', right: 0, top: 0, bottom: 0,
-            width: 220,
-            display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
-          }}>
-            <img src={manLogo} alt="mascot" style={{ height: '100%', width: 'auto', objectFit: 'contain', display: 'block' }} />
+            {/* White card — clips content at rounded corners */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: '#fff',
+              borderRadius: 22,
+              border: '1px solid rgba(0,0,0,0.06)',
+              boxShadow: '0 2px 16px rgba(91,33,182,0.07)',
+              overflow: 'hidden',
+            }}>
+              {/* FOFiTOS logo — right edge reserved for mascot */}
+              <div style={{
+                position: 'absolute',
+                left: 18, right: 130, top: 0, bottom: 0,
+                display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 5,
+              }}>
+                <img src={logoImg} alt="FOFiTOS" style={{ height: 58, objectFit: 'contain', objectPosition: 'left', display: 'block' }} />
+                <div style={{ fontSize: '0.62rem', fontWeight: 500, color: '#bbb', letterSpacing: '0.3px' }}>
+                  Product of Doctor Farmer Foods
+                </div>
+              </div>
+            </div>
+
+            {/* Mascot — outside card, overlays right side, extends below */}
+            <div className="cat-hdr-mascot-wrap">
+              <img src={manLogo} alt="mascot" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'right top', display: 'block' }} />
+            </div>
           </div>
         </div>
 
