@@ -39,7 +39,7 @@ function ProdCard({ p, index, onClick }) {
         cursor: 'pointer',
         userSelect: 'none',
         WebkitTapHighlightColor: 'transparent',
-        animation: `prodCardIn 0.38s cubic-bezier(0.22,1,0.36,1) ${index * 0.04}s both`,
+        animation: `prodCardIn 0.35s ease ${index * 0.04}s both`,
         transition: 'transform 0.13s cubic-bezier(.4,0,.2,1)',
       }}
       onTouchStart={e => e.currentTarget.style.transform = 'scale(0.94)'}
@@ -69,19 +69,17 @@ function ProdCard({ p, index, onClick }) {
         }}
       />
 
-      {/* ── Glassy card — just name, image overlaps the top ── */}
+      {/* ── Card ── */}
       <div style={{
-        background: 'rgba(255,255,255,0.45)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
+        background: '#fff',
         borderRadius: 18,
         paddingTop: OVF + 6,
         paddingBottom: 12,
         paddingLeft: 6,
         paddingRight: 6,
         textAlign: 'center',
-        boxShadow: '0 8px 32px rgba(91,33,182,0.10), inset 0 1px 0 rgba(255,255,255,0.8)',
-        border: '1px solid rgba(255,255,255,0.65)',
+        boxShadow: '0 4px 18px rgba(91,33,182,0.10)',
+        border: '1px solid rgba(91,33,182,0.07)',
         position: 'relative',
         zIndex: 1,
         minHeight: OVF + 52,
@@ -136,8 +134,8 @@ export default function CategoryPage() {
     <>
       <style>{`
         @keyframes prodCardIn {
-          from { opacity: 0; transform: translateY(18px) scale(0.95); }
-          to   { opacity: 1; transform: translateY(0)    scale(1); }
+          from { opacity: 0; transform: translateY(12px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
         @keyframes pageSlideUp {
           from { opacity: 0; transform: translateY(14px); }
