@@ -50,7 +50,7 @@ function ActivityRings({ pro, fat, carb, fibre, cal, revealed = false }) {
   ]
 
   // Gap between segments in degrees (creates the white notch)
-  const GAP_DEG = 4
+  const GAP_DEG = 6
   const GAP_ARC = (GAP_DEG / 360) * circ
   const usable  = circ - segments.length * GAP_ARC
 
@@ -90,7 +90,7 @@ function ActivityRings({ pro, fat, carb, fibre, cal, revealed = false }) {
               fill="none"
               stroke={arc.color}
               strokeWidth={SW}
-              strokeLinecap="butt"
+              strokeLinecap="round"
               transform={`rotate(${arc.rotAngle} ${C} ${C})`}
               style={{
                 strokeDasharray: `${revealed ? arc.arcLen : 0} ${circ}`,
