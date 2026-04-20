@@ -3,11 +3,13 @@ import QRCodeLib from 'qrcode'
 import fofitosLogo from '../../assets/qr.png'
 import { sb } from '../../lib/supabase'
 
-const URL = 'https://www.fofitos.com'
 const SIZE = 480
 
-async function buildQR() {
-  const qrDataUrl = await QRCodeLib.toDataURL(URL, {
+/* Build a QR image for a specific /go/:num URL */
+async function buildQR(num) {
+  const targetUrl = `${window.location.origin}/go/${num}`
+
+  const qrDataUrl = await QRCodeLib.toDataURL(targetUrl, {
     width: SIZE, margin: 2,
     color: { dark: '#000000', light: '#ffffff' },
     errorCorrectionLevel: 'H',
@@ -37,15 +39,9 @@ async function buildQR() {
   return canvas.toDataURL('image/png')
 }
 
-/* Shared QR image — generated once, reused across all 12 cards */
-function useSharedQR() {
-  const [qrUrl, setQrUrl] = useState('')
-  useEffect(() => { buildQR().then(setQrUrl) }, [])
-  return qrUrl
-}
-
-function QRCard({ num, label: defaultLabel, qrUrl }) {
+function QRCard({ num, label: defaultLabel }) {
   const id = String(num)
+  const [qrUrl,        setQrUrl]        = useState('')
   const [downloading,  setDownloading]  = useState(false)
   const [dest,         setDest]         = useState('')
   const [input,        setInput]        = useState('')
@@ -58,6 +54,8 @@ function QRCard({ num, label: defaultLabel, qrUrl }) {
   const [editingTitle, setEditingTitle] = useState(false)
   const [titleInput,   setTitleInput]   = useState(defaultLabel)
   const [savingTitle,  setSavingTitle]  = useState(false)
+
+  useEffect(() => { buildQR(num).then(setQrUrl) }, [num])
 
   useEffect(() => {
     sb.from('qr_links').select('url, label').eq('id', id).maybeSingle()
@@ -344,8 +342,7 @@ function QRCard({ num, label: defaultLabel, qrUrl }) {
 }
 
 export default function QRPage() {
-  const qrUrl  = useSharedQR()
-  const [cats, setCats]   = useState([])   // category names fetched from DB
+  const [cats, setCats]   = useState([])
   const [dlAll, setDlAll] = useState(false)
 
   useEffect(() => {
@@ -353,26 +350,23 @@ export default function QRPage() {
       .then(({ data }) => setCats((data || []).map(c => c.name)))
   }, [])
 
-  // Build label for each QR number 1-12
-  // QR 3-10 → category name; others → "QR Code N"
   function labelFor(n) {
     if (n >= 3 && n <= 10) {
-      const catName = cats[n - 3] // index 0-7 for QR 3-10
+      const catName = cats[n - 3]
       return catName || `QR Code ${n}`
     }
     return `QR Code ${n}`
   }
 
   async function downloadAll() {
-    if (!qrUrl) return
     setDlAll(true)
     for (let i = 1; i <= 12; i++) {
+      const qr = await buildQR(i)
       const a = document.createElement('a')
-      const label = labelFor(i)
-      a.download = `fofitos-qr-${label.replace(/\s+/g, '-').toLowerCase()}.png`
-      a.href = qrUrl
+      a.download = `fofitos-qr-${labelFor(i).replace(/\s+/g, '-').toLowerCase()}.png`
+      a.href = qr
       a.click()
-      await new Promise(r => setTimeout(r, 250))
+      await new Promise(r => setTimeout(r, 300))
     }
     setDlAll(false)
   }
@@ -395,13 +389,13 @@ export default function QRPage() {
         <div>
           <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#1A1A2E' }}>QR Codes</div>
           <div style={{ fontSize: '0.8rem', color: '#9A98A8', marginTop: 4 }}>
-            12 permanent QR codes — all encode <strong style={{ color: '#7C3AED' }}>https://www.fofitos.com</strong> forever.
-            QR 3–10 are named after your menu categories.
+            12 QR codes — each encodes a unique <strong style={{ color: '#7C3AED' }}>/go/N</strong> redirect URL.
+            Set the destination in each card below.
           </div>
         </div>
         <button
           onClick={downloadAll}
-          disabled={!qrUrl || dlAll}
+          disabled={dlAll}
           style={{
             padding: '11px 22px', borderRadius: 12, border: 'none',
             background: dlAll ? '#9A98A8' : 'linear-gradient(135deg,#5B21B6,#7C3AED)',
@@ -426,7 +420,7 @@ export default function QRPage() {
       {/* Grid */}
       <div className="qr-grid">
         {Array.from({ length: 12 }, (_, i) => (
-          <QRCard key={i + 1} num={i + 1} label={labelFor(i + 1)} qrUrl={qrUrl} />
+          <QRCard key={i + 1} num={i + 1} label={labelFor(i + 1)} />
         ))}
       </div>
     </div>
