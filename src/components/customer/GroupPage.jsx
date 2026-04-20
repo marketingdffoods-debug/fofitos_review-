@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { sb } from '../../lib/supabase'
 import Footer from './Footer'
-import logoImg from '../../assets/logo.png'
-import manLogo from '../../assets/man-logo.png'
+import Header from './Header'
 
 const IMG = 140
 const OVF = IMG / 2
@@ -124,37 +123,7 @@ export default function GroupPage() {
           from { transform: translateY(100vh); }
           to   { transform: translateY(0); }
         }
-        .cat-hdr-row {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          padding: 16px 16px 0;
-        }
-        .cat-hdr-card-wrap {
-          flex: 1;
-          position: relative;
-          height: 118px;
-        }
-        .cat-hdr-mascot-wrap {
-          position: absolute;
-          right: 0; top: 0;
-          width: 130px;
-          height: calc(100% + 22px);
-          pointer-events: none;
-          z-index: 3;
-        }
-        @media (min-width: 900px) {
-          .cat-hdr-row {
-            max-width: 980px;
-            margin: 24px auto 0;
-            padding: 0;
-          }
-          .cat-hdr-card-wrap { height: 155px; }
-          .cat-hdr-mascot-wrap { width: 200px; }
-        }
-        .grp-wrap {
-          padding: 16px 16px 40px;
-        }
+        .grp-wrap { padding: 16px 16px 40px; }
         .prod-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
@@ -162,15 +131,8 @@ export default function GroupPage() {
           align-items: start;
         }
         @media (min-width: 900px) {
-          .grp-wrap {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px 48px 60px;
-          }
-          .prod-grid {
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px 16px;
-          }
+          .grp-wrap { max-width: 900px; margin: 0 auto; padding: 20px 48px 60px; }
+          .prod-grid { grid-template-columns: repeat(4, 1fr); gap: 20px 16px; }
         }
       `}</style>
 
@@ -181,65 +143,8 @@ export default function GroupPage() {
         willChange: 'transform',
       }}>
 
-        {/* ── Header: [← button] [card + mascot] ── */}
-        <div className="cat-hdr-row">
-
-          {/* ① Back button — standalone, outside the white card */}
-          <button
-            onClick={() => nav('/')}
-            style={{
-              flexShrink: 0,
-              width: 38, height: 38, borderRadius: '50%',
-              border: '1.5px solid rgba(91,33,182,0.18)',
-              background: '#fff',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', fontSize: '1.1rem', color: '#5B21B6',
-              boxShadow: '0 2px 10px rgba(91,33,182,0.12)',
-              transition: 'background 0.2s, color 0.2s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#5B21B6'; e.currentTarget.style.color = '#fff' }}
-            onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = '#5B21B6' }}
-          >←</button>
-
-          {/* ② Card + mascot wrapper */}
-          <div className="cat-hdr-card-wrap">
-
-            {/* Glossy card */}
-            <div style={{
-              position: 'absolute', inset: 0,
-              background: 'linear-gradient(155deg, rgba(255,255,255,0.88) 0%, rgba(232,226,255,0.78) 100%)',
-              backdropFilter: 'blur(28px)',
-              WebkitBackdropFilter: 'blur(28px)',
-              borderRadius: 22,
-              border: '1.5px solid rgba(255,255,255,0.75)',
-              boxShadow: '0 8px 32px rgba(91,33,182,0.14), inset 0 1.5px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(91,33,182,0.06)',
-              overflow: 'hidden',
-            }}>
-              {/* Gloss shine overlay */}
-              <div style={{
-                position: 'absolute', inset: 0, borderRadius: 22,
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.10) 46%, rgba(255,255,255,0) 100%)',
-                pointerEvents: 'none', zIndex: 0,
-              }}/>
-              <div style={{
-                position: 'absolute',
-                left: 18, right: 130, top: 0, bottom: 0,
-                display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 5,
-                zIndex: 1,
-              }}>
-                <img src={logoImg} alt="FOFiTOS" style={{ height: 58, objectFit: 'contain', objectPosition: 'left', display: 'block' }} />
-                <div style={{ fontSize: '0.62rem', fontWeight: 500, color: '#bbb', letterSpacing: '0.3px' }}>
-                  Product of Doctor Farmer Foods
-                </div>
-              </div>
-            </div>
-
-            {/* Mascot — outside card, extends below */}
-            <div className="cat-hdr-mascot-wrap">
-              <img src={manLogo} alt="mascot" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'right top', display: 'block' }} />
-            </div>
-          </div>
-        </div>
+        {/* ── Header ── */}
+        <Header showBack />
 
         {/* ── Group title ── */}
         <div style={{ padding: '14px 20px 0' }}>

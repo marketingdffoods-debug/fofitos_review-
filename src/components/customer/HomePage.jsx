@@ -2,8 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { sb } from '../../lib/supabase'
 import Footer from './Footer'
-import logoImg from '../../assets/logo.png'
-import manLogo from '../../assets/man-logo.png'
+import Header from './Header'
 
 /* ── Floating image constants (same as CategoryPage) ── */
 const IMG = 130
@@ -208,26 +207,7 @@ export default function HomePage() {
         overflow: 'hidden',
       }}>
         {/* ── Header ── */}
-        <div className="home-header-wrap">
-          <div style={{
-            position: 'absolute', left: 24, top: 0, bottom: 0,
-            display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8,
-            zIndex: 2,
-          }}>
-            <img src={logoImg} alt="FOFiTOS" style={{ height: 80, objectFit: 'contain', objectPosition: 'left', display: 'block' }} />
-            <div style={{ fontSize: '0.68rem', fontWeight: 500, color: '#aaa', letterSpacing: '0.3px' }}>
-              Product of Doctor Farmer Foods
-            </div>
-          </div>
-
-          <div style={{
-            position: 'absolute', right: 0, top: 0, bottom: 0,
-            width: 240,
-            display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
-          }}>
-            <img src={manLogo} alt="mascot" style={{ height: '100%', width: 'auto', objectFit: 'contain', display: 'block' }} />
-          </div>
-        </div>
+        <Header />
 
         {/* ── Category grid ── */}
         <div className="home-cats" style={{ paddingTop: OVF + 16 }}>
