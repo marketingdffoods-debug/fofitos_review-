@@ -60,10 +60,10 @@ export default function Footer() {
   return (
     <div style={{
       margin: '24px 0 0',
-      padding: '16px 16px 28px',
       borderTop: '1px solid rgba(0,0,0,0.07)',
       background: 'transparent',
     }}>
+      <div className="footer-inner">
       {/* ── Row: company left | contact right ── */}
       <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:16, flexWrap:'wrap' }}>
 
@@ -104,7 +104,18 @@ export default function Footer() {
           .footer-contact-mobile  { display: none !important; }
           .footer-contact-desktop { display: block !important; }
         }
+        .footer-inner {
+          padding: 16px 16px 28px;
+        }
+        @media (min-width: 900px) {
+          .footer-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 120px 36px;
+          }
+        }
       `}</style>
+      </div>
     </div>
   )
 }
