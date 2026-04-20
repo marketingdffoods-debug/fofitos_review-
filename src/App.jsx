@@ -4,6 +4,7 @@ import { sb } from './lib/supabase'
 import HomePage from './components/customer/HomePage'
 import CategoryPage from './components/customer/CategoryPage'
 import DetailPage from './components/customer/DetailPage'
+import GroupPage from './components/customer/GroupPage'
 import AdminLayout from './components/admin/AdminLayout'
 import AdminLogin from './components/admin/AdminLogin'
 import Dashboard from './components/admin/Dashboard'
@@ -42,6 +43,7 @@ export default function App() {
         {/* ── Customer routes ── */}
         <Route path="/" element={<HomePage />} />
         <Route path="/category/:catId" element={<CategoryPage />} />
+        <Route path="/group/:groupName" element={<GroupPage />} />
         <Route path="/product/:productId" element={<DetailPage />} />
 
         {/* ── QR Redirect routes ── */}

@@ -159,8 +159,36 @@ export default function HomePage() {
       })
   }, [])
 
+  /* ── Merge grouped categories into one virtual card ── */
+  const displayCats = (() => {
+    const out = []
+    const seen = new Set()
+    for (const c of cats) {
+      if (c.group_name) {
+        if (seen.has(c.group_name)) continue
+        seen.add(c.group_name)
+        const siblings = cats.filter(x => x.group_name === c.group_name)
+        out.push({
+          id: `__group__${c.group_name}`,
+          name: c.group_name,
+          img: c.img,                                        // use first sub-cat image
+          description: siblings.map(x => x.name).join(' · '),
+          _isGroup: true,
+          _groupName: c.group_name,
+        })
+      } else {
+        out.push(c)
+      }
+    }
+    return out
+  })()
+
   function openCategory(cat) {
-    nav(`/category/${cat.id}`, { state: { cat } })
+    if (cat._isGroup) {
+      nav(`/group/${encodeURIComponent(cat._groupName)}`)
+    } else {
+      nav(`/category/${cat.id}`, { state: { cat } })
+    }
   }
 
   return (
@@ -208,7 +236,7 @@ export default function HomePage() {
             <div className="loading">Loading menu…</div>
           ) : (
             <div className="cat-grid-new" style={{ alignItems: 'start' }}>
-              {cats.map((c, i) => (
+              {displayCats.map((c, i) => (
                 <CatCard
                   key={c.id}
                   c={c}
