@@ -417,9 +417,9 @@ export default function QRPage() {
             background: dlAll ? '#9A98A8' : 'linear-gradient(135deg,#5B21B6,#7C3AED)',
             color: '#fff', fontFamily: 'Outfit, sans-serif',
             fontSize: '0.88rem', fontWeight: 700,
-            cursor: (!qrUrl || dlAll) ? 'default' : 'pointer',
+            cursor: dlAll ? 'default' : 'pointer',
             display: 'flex', alignItems: 'center', gap: 8,
-            opacity: (!qrUrl || dlAll) ? 0.7 : 1,
+            opacity: dlAll ? 0.7 : 1,
             boxShadow: '0 4px 18px rgba(91,33,182,0.25)',
             flexShrink: 0,
           }}
