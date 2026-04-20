@@ -74,9 +74,13 @@ function QRCard({ num, label: defaultLabel, qrUrl }) {
     const trimmed = titleInput.trim()
     if (!trimmed) return
     setSavingTitle(true)
-    await sb.from('qr_links').upsert({ id, label: trimmed }, { onConflict: 'id' })
-    setTitle(trimmed)
+    const { error } = await sb.from('qr_links').upsert({ id, label: trimmed }, { onConflict: 'id' })
     setSavingTitle(false)
+    if (error) {
+      alert('Could not save title. Please run this SQL in Supabase:\n\nALTER TABLE qr_links ADD COLUMN IF NOT EXISTS label TEXT;\n\nError: ' + error.message)
+      return
+    }
+    setTitle(trimmed)
     setEditingTitle(false)
   }
 
