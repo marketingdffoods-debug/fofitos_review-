@@ -32,105 +32,82 @@ function avatarColor(name) {
   return colors[h]
 }
 
-/* ── Apple Watch-style animated activity rings ── */
+/* ── Calorie breakdown donut ── */
 function ActivityRings({ pro, fat, carb, fibre, cal, revealed = false }) {
-  const SIZE = 130
-  const C    = SIZE / 2   // 65
-  const SW   = 10         // stroke width
+  const SIZE = 180
+  const C    = SIZE / 2          // 90
+  const R    = 70                // ring radius
+  const SW   = 22                // thick stroke to match screenshot
+  const circ = 2 * Math.PI * R
 
-  const total = Math.max((pro||0)+(fat||0)+(carb||0)+(fibre||0), 1)
+  // Use carb+protein+fat as donut total (3 segments, matches screenshot)
+  const total = Math.max((carb||0) + (pro||0) + (fat||0), 1)
 
-  // Three concentric rings: outer → inner
-  const rings = [
-    { r:52, color:'#4A90D9', label:'Carbs',   val:carb  || 0 },
-    { r:39, color:'#2CB67D', label:'Protein', val:pro   || 0 },
-    { r:26, color:'#E09A2C', label:'Fat',     val:fat   || 0 },
+  const segments = [
+    { label:'Carbs',   val: carb||0, color:'#4A90D9' },
+    { label:'Protein', val: pro ||0, color:'#2CB67D' },
+    { label:'Fat',     val: fat ||0, color:'#E05252' },
   ]
 
-  // End-point of arc + rotation angle for the arrow tip
-  function endPt(r, pct) {
-    const a = -Math.PI/2 + pct * 2 * Math.PI
-    return { x: C + r*Math.cos(a), y: C + r*Math.sin(a), rot: pct*360 }
-  }
+  // Gap between segments in degrees (creates the white notch)
+  const GAP_DEG = 4
+  const GAP_ARC = (GAP_DEG / 360) * circ
+  const usable  = circ - segments.length * GAP_ARC
 
+  // Build arc start angles
+  let angle = -90   // 12 o'clock
+  const arcs = segments.map(seg => {
+    const arcLen   = (seg.val / total) * usable
+    const rotAngle = angle
+    angle += (arcLen / circ) * 360 + GAP_DEG
+    return { ...seg, arcLen, rotAngle }
+  })
+
+  // Legend includes fibre using the full macro total
+  const fullTotal = Math.max((carb||0)+(pro||0)+(fat||0)+(fibre||0), 1)
   const legend = [
-    { l:'Carbs',   pct:Math.round((carb  ||0)/total*100), c:'#4A90D9' },
-    { l:'Protein', pct:Math.round((pro   ||0)/total*100), c:'#2CB67D' },
-    { l:'Fat',     pct:Math.round((fat   ||0)/total*100), c:'#E09A2C' },
-    { l:'Fibre',   pct:Math.round((fibre ||0)/total*100), c:'#C8BEA8' },
+    { l:'Carbs',   pct: Math.round((carb  ||0)/fullTotal*100), c:'#4A90D9' },
+    { l:'Protein', pct: Math.round((pro   ||0)/fullTotal*100), c:'#2CB67D' },
+    { l:'Fat',     pct: Math.round((fat   ||0)/fullTotal*100), c:'#E05252' },
+    { l:'Fibre',   pct: Math.round((fibre ||0)/fullTotal*100), c:'#C8BEA8' },
   ]
 
   return (
-    <div style={{display:'flex', alignItems:'center', gap:16}}>
-      {/* ── Rings SVG ── */}
+    <div style={{display:'flex', alignItems:'center', gap:20}}>
+
+      {/* ── Donut SVG ── */}
       <div style={{flexShrink:0}}>
-        <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`}
-          style={{display:'block', overflow:'hidden'}}
-          overflow="hidden"
-        >
-          {/* White background */}
-          <circle cx={C} cy={C} r={C} fill="#ffffff"/>
+        <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} style={{display:'block'}}>
 
-          {rings.map((ring, i) => {
-            const pct  = ring.val / total
-            const circ = 2 * Math.PI * ring.r
-            const len  = revealed ? Math.max(pct * circ - SW*0.55, 0) : 0
-            const ep   = endPt(ring.r, pct)
+          {/* Light grey track ring */}
+          <circle cx={C} cy={C} r={R} fill="none" stroke="#EDE9F8" strokeWidth={SW}/>
 
-            return (
-              <g key={ring.label}>
-                {/* Dim track */}
-                <circle
-                  cx={C} cy={C} r={ring.r}
-                  fill="none"
-                  stroke={ring.color}
-                  strokeWidth={SW}
-                  strokeOpacity={0.18}
-                />
-                {/* Animated filled arc — starts from 12 o'clock */}
-                <circle
-                  cx={C} cy={C} r={ring.r}
-                  fill="none"
-                  stroke={ring.color}
-                  strokeWidth={SW}
-                  strokeLinecap="round"
-                  transform={`rotate(-90 ${C} ${C})`}
-                  style={{
-                    strokeDasharray: `${len} ${circ}`,
-                    transition: revealed
-                      ? `stroke-dasharray 1.0s ${i*0.22}s cubic-bezier(0.22,1,0.36,1)`
-                      : 'none',
-                    filter: 'none',
-                  }}
-                />
-                {/* Arrow chevron at the tip of each ring */}
-                {revealed && pct > 0.04 && (
-                  <g
-                    transform={`translate(${ep.x},${ep.y}) rotate(${ep.rot})`}
-                    style={{opacity:0, animation:`fadeIn 0.22s ${i*0.22+1.05}s ease forwards`}}
-                  >
-                    <path
-                      d="M-5.5,-4 L0.5,0 L-5.5,4"
-                      fill="none"
-                      stroke={ring.color}
-                      strokeWidth="2.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </g>
-                )}
-              </g>
-            )
-          })}
+          {/* Coloured segments */}
+          {arcs.map((arc, i) => (
+            <circle
+              key={arc.label}
+              cx={C} cy={C} r={R}
+              fill="none"
+              stroke={arc.color}
+              strokeWidth={SW}
+              strokeLinecap="butt"
+              transform={`rotate(${arc.rotAngle} ${C} ${C})`}
+              style={{
+                strokeDasharray: `${revealed ? arc.arcLen : 0} ${circ}`,
+                transition: revealed
+                  ? `stroke-dasharray 0.9s ${i * 0.18}s cubic-bezier(0.22,1,0.36,1)`
+                  : 'none',
+              }}
+            />
+          ))}
 
-          {/* Center: calorie value */}
-          <text x={C} y={C-2} textAnchor="middle"
-            fill="#1a1a2e" fontSize="16" fontWeight="800" fontFamily="Outfit,sans-serif"
-          >{cal}</text>
-          <text x={C} y={C+11} textAnchor="middle"
-            fill="#bbb" fontSize="8" letterSpacing="2"
-            fontFamily="Outfit,sans-serif"
-          >KCAL</text>
+          {/* Center: calorie number */}
+          <text x={C} y={C + 8} textAnchor="middle"
+            fill="#1a1a2e" fontSize="26" fontWeight="800" fontFamily="Outfit,sans-serif"
+          >{cal || 0}</text>
+          <text x={C} y={C + 24} textAnchor="middle"
+            fill="#aaa" fontSize="12" fontFamily="Outfit,sans-serif"
+          >kcal</text>
         </svg>
       </div>
 
@@ -139,7 +116,10 @@ function ActivityRings({ pro, fat, carb, fibre, cal, revealed = false }) {
         {legend.map(m => (
           <div key={m.l} style={{display:'flex', alignItems:'center', justifyContent:'space-between'}}>
             <span style={{display:'flex', alignItems:'center', gap:7, fontSize:'0.78rem', color:'#555'}}>
-              <span style={{width:8, height:8, borderRadius:'50%', background:m.c, display:'inline-block', flexShrink:0}}/>
+              <span style={{
+                width:9, height:9, borderRadius:'50%',
+                background:m.c, display:'inline-block', flexShrink:0
+              }}/>
               {m.l}
             </span>
             <span style={{fontSize:'0.78rem', fontWeight:700, color:'#1a1a2e'}}>{m.pct}%</span>
