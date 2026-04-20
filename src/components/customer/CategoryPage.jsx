@@ -152,6 +152,11 @@ export default function CategoryPage() {
         @media (min-width: 900px) {
           .cat-video-wrap { max-width: 680px; margin: 18px auto 0; }
         }
+        /* ── Category title ── */
+        .cat-title-wrap { padding: 12px 20px 4px; }
+        @media (min-width: 900px) {
+          .cat-title-wrap { max-width: 900px; margin: 0 auto; padding: 16px 48px 6px; }
+        }
         /* ── Product grid ── */
         .prod-grid-wrap { padding: 16px 16px 130px; }
         .prod-grid {
@@ -198,7 +203,7 @@ export default function CategoryPage() {
         )}
 
         {/* ── Category name + desc ── */}
-        <div style={{ padding: '12px 20px 4px' }}>
+        <div className="cat-title-wrap">
           <div style={{
             fontSize: '1.25rem', fontWeight: 800, color: '#5B21B6',
             letterSpacing: '-0.3px', lineHeight: 1.2,

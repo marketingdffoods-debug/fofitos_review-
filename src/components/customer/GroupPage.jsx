@@ -120,6 +120,10 @@ export default function GroupPage() {
           from { opacity: 0; transform: translateY(14px); }
           to   { opacity: 1; transform: translateY(0); }
         }
+        .grp-title-wrap { padding: 14px 20px 0; }
+        @media (min-width: 900px) {
+          .grp-title-wrap { max-width: 900px; margin: 0 auto; padding: 18px 48px 0; }
+        }
         .grp-wrap { padding: 16px 16px 40px; }
         .prod-grid {
           display: grid;
@@ -143,7 +147,7 @@ export default function GroupPage() {
         <Header showBack />
 
         {/* ── Group title ── */}
-        <div style={{ padding: '14px 20px 0' }}>
+        <div className="grp-title-wrap">
           <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#5B21B6', letterSpacing: '-0.3px' }}>
             {decoded}
           </div>
