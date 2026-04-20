@@ -41,7 +41,7 @@ function ProdCard({ p, index, onClick }) {
           display: 'block',
           zIndex: 2,
           pointerEvents: 'none',
-          filter: 'drop-shadow(0 8px 18px rgba(0,0,0,0.18))',
+          filter: 'drop-shadow(0 6px 12px rgba(91,33,182,0.13))',
         }}
       />
       <div style={{

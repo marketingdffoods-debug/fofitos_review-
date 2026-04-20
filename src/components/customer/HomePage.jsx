@@ -88,7 +88,7 @@ function CatCard({ c, index, onExpand }) {
           display: 'block',
           zIndex: 2,
           pointerEvents: 'none',
-          filter: 'drop-shadow(0 8px 20px rgba(0,0,0,0.18))',
+          filter: 'drop-shadow(0 6px 12px rgba(91,33,182,0.13))',
         }}
       />
 
