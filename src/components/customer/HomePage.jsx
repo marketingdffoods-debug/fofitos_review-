@@ -13,7 +13,8 @@ function CatCard({ c, index, onExpand }) {
   const [phase, setPhase] = useState('idle')
   const pressTimer = useRef(null)
   const navTimer   = useRef(null)
-  const touchUsed  = useRef(false)   // prevents duplicate mouse events after touch
+  const touchUsed  = useRef(false)  // prevents duplicate mouse events after touch
+  const moved      = useRef(false)  // true when finger slides = scroll, not a tap
 
   useEffect(() => () => {
     clearTimeout(pressTimer.current)
@@ -21,16 +22,24 @@ function CatCard({ c, index, onExpand }) {
   }, [])
 
   function startPress(e) {
-    if (e.type === 'touchstart') touchUsed.current = true
+    if (e.type === 'touchstart') { touchUsed.current = true; moved.current = false }
     else if (touchUsed.current) return   // skip mousedown fired after touch
     clearTimeout(pressTimer.current)
     setPhase('pressing')
     pressTimer.current = setTimeout(() => setPhase('lifted'), 80)
   }
+  function handleTouchMove() {
+    if (moved.current) return
+    moved.current = true          // finger is sliding → this is a scroll
+    clearTimeout(pressTimer.current)
+    clearTimeout(navTimer.current)
+    setPhase('idle')              // reset visual immediately
+  }
   function endPress(e) {
     if (e.type === 'mouseup' && touchUsed.current) { touchUsed.current = false; return }
-    if (e.type === 'touchend') { e.preventDefault(); touchUsed.current = false }
+    if (e.type === 'touchend') touchUsed.current = false  // removed e.preventDefault() — fixes console error
     clearTimeout(pressTimer.current)
+    if (moved.current) { setPhase('idle'); return }  // was a scroll → do nothing
     if (phase === 'pressing' || phase === 'lifted') {
       setPhase('lifted')
       clearTimeout(navTimer.current)
@@ -68,6 +77,7 @@ function CatCard({ c, index, onExpand }) {
         willChange: 'transform',
       }}
       onTouchStart={startPress}
+      onTouchMove={handleTouchMove}
       onTouchEnd={endPress}
       onTouchCancel={cancelPress}
       onMouseDown={startPress}
