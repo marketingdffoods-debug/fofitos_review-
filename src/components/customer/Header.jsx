@@ -36,7 +36,6 @@ export default function Header({ showBack = false, onBack }) {
           {/* FOFiTOS logo + tagline */}
           <div className="hdr-logo-zone">
             <img src={logoImg} alt="FOFiTOS" className="hdr-logo-img" />
-            <div className="hdr-tagline">Product of Doctor Farmer Foods</div>
           </div>
         </div>
 
