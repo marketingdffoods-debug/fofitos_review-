@@ -218,7 +218,10 @@ body {
   }
   .hdr-card-wrap { height: 165px; width: 100%; }
   .hdr-logo-img  { height: 90px; }
-  .hdr-mascot-wrap { top: -8px; bottom: -90px; width: 48%; }
+  .hdr-mascot-wrap {
+    top: -8px; bottom: -90px; width: 44%;
+    clip-path: inset(-300px 0px -300px -9999px); /* clip right edge, allow top/bottom/left overflow */
+  }
   .hdr-mascot-img  { transform: translateY(52px); }
 }
 
